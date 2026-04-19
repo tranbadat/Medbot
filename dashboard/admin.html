@@ -177,6 +177,20 @@ let token = localStorage.getItem('admin_token') || '';
 let _editStaffId = null;
 let _staffList = [];
 
+const STATUS_LABEL = {
+  pending:   'Chờ xác nhận',
+  confirmed: 'Đã xác nhận',
+  cancelled: 'Đã huỷ',
+  active:    'Đang tư vấn',
+  closed:    'Đã kết thúc',
+  online:    'Trực tuyến',
+  offline:   'Ngoại tuyến',
+  busy:      'Đang bận',
+};
+const ROLE_LABEL = { doctor: 'Bác sĩ', nurse: 'Y tá' };
+function fmtStatus(s) { return STATUS_LABEL[s] || s; }
+function fmtRole(r)   { return ROLE_LABEL[r]   || r; }
+
 function authH() { return {'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json'}; }
 
 async function doLogin() {
@@ -252,10 +266,10 @@ async function staff() {
       <tr><th>Họ tên</th><th>Vai trò</th><th>Chuyên khoa</th><th>Giờ làm</th><th>Trạng thái</th><th></th></tr>
       ${_staffList.map(s => `<tr>
         <td><strong>${esc(s.name)}</strong><br><span style="font-size:11px;color:#94a3b8">${esc(s.username||'')}</span></td>
-        <td><span class="badge badge-${s.role}">${s.role==='doctor'?'Bác sĩ':'Y tá'}</span></td>
+        <td><span class="badge badge-${s.role}">${fmtRole(s.role)}</span></td>
         <td>${esc(s.specialty)}</td>
         <td style="font-size:12px;color:#64748b">${esc(s.working_hours||'')}</td>
-        <td><span class="badge badge-${s.status}">${s.status}</span></td>
+        <td><span class="badge badge-${s.status}">${fmtStatus(s.status)}</span></td>
         <td style="display:flex;gap:6px">
           <button class="btn btn-ghost" style="padding:4px 10px;font-size:12px" onclick="openEditStaff('${s.id}')">✏️</button>
           <button class="btn btn-danger" style="padding:4px 10px;font-size:12px" onclick="deactivateStaff('${s.id}')">🗑</button>
@@ -380,7 +394,7 @@ async function appointments() {
           <td>${esc(a.patient_name)}</td>
           <td>${ds}</td>
           <td>${esc(a.doctor_name||'Chưa phân công')}</td>
-          <td><span class="badge badge-${a.status}">${a.status}</span></td>
+          <td><span class="badge badge-${a.status}">${fmtStatus(a.status)}</span></td>
           <td style="display:flex;gap:4px">
             ${a.status==='pending'?`<button class="btn btn-success" style="padding:4px 8px;font-size:11px" onclick="patchAppt('${a.id}','confirmed')">✅</button>`:''}
             ${a.status!=='cancelled'?`<button class="btn btn-danger" style="padding:4px 8px;font-size:11px" onclick="patchAppt('${a.id}','cancelled')">✖</button>`:''}
@@ -411,7 +425,7 @@ async function sessions() {
         <td>${esc(s.specialty||'—')}</td>
         <td>${esc(s.urgency||'—')}</td>
         <td>${esc(s.doctor_name||'—')}</td>
-        <td><span class="badge badge-${s.status}">${s.status}</span></td>
+        <td><span class="badge badge-${s.status}">${fmtStatus(s.status)}</span></td>
         <td style="font-size:11px;color:#64748b">${s.created_at ? new Date(s.created_at).toLocaleString('vi-VN') : '—'}</td>
       </tr>`).join('')}
     </table></div>`;

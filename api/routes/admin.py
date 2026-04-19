@@ -119,7 +119,7 @@ async def list_staff(_: dict = Depends(get_admin), db: AsyncSession = Depends(ge
             "id": str(s.id),
             "name": s.name,
             "specialty": s.specialty,
-            "role": s.role.value,
+            "role": s.role if isinstance(s.role, str) else s.role.value,
             "working_hours": s.working_hours,
             "is_active": s.is_active,
             "status": status,
@@ -146,7 +146,7 @@ async def create_staff(req: StaffCreateRequest, _: dict = Depends(get_admin), db
     db.add(doctor)
     await db.commit()
     await db.refresh(doctor)
-    return {"id": str(doctor.id), "name": doctor.name, "role": doctor.role.value}
+    return {"id": str(doctor.id), "name": doctor.name, "role": doctor.role if isinstance(doctor.role, str) else doctor.role.value}
 
 
 @router.put("/staff/{staff_id}")

@@ -328,7 +328,7 @@ function renderCaseList() {
       <div class="case-user">${c.user_id||c.user_name||'User'}</div>
       <div class="case-meta">
         <span class="badge badge-${c.urgency||'medium'}">${c.urgency||'medium'}</span>
-        <span class="badge badge-${c.status||'pending'}" style="margin-left:4px">${c.status||'pending'}</span>
+        <span class="badge badge-${c.status||'pending'}" style="margin-left:4px">${{pending:'Chờ nhận',active:'Đang tư vấn',closed:'Đã kết thúc'}[c.status]||c.status||'Chờ nhận'}</span>
         ${c.specialty ? `<span style="margin-left:4px">${c.specialty}</span>` : ''}
       </div>
     </div>
@@ -545,12 +545,14 @@ async function loadAppointments() {
       const d = new Date(a.appointment_date);
       const dateStr = d.toLocaleDateString('vi-VN') + ' ' + d.toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'});
       const statusColor = {pending:'#f59e0b',confirmed:'#22c55e',cancelled:'#ef4444'}[a.status]||'#94a3b8';
+      const statusLabel = {pending:'Chờ xác nhận',confirmed:'Đã xác nhận',cancelled:'Đã huỷ'}[a.status]||a.status;
       return `<div style="border:1px solid #e2e8f0;border-radius:8px;padding:10px;margin-bottom:8px">
         <div style="font-weight:600">${escHtml(a.patient_name)}</div>
         <div style="font-size:12px;color:#64748b">📅 ${dateStr}</div>
         <div style="font-size:12px;margin-top:4px;display:flex;gap:8px;align-items:center">
-          <span style="background:${statusColor};color:#fff;padding:2px 8px;border-radius:10px;font-size:11px">${a.status}</span>
+          <span style="background:${statusColor};color:#fff;padding:2px 8px;border-radius:10px;font-size:11px">${statusLabel}</span>
           ${a.status==='pending'?`<button onclick="confirmAppt('${a.id}')" style="font-size:11px;padding:2px 8px;border:1px solid #22c55e;color:#22c55e;background:none;border-radius:6px;cursor:pointer">✅ Xác nhận</button>`:''}
+          ${a.status==='pending'?`<button onclick="cancelAppt('${a.id}')" style="font-size:11px;padding:2px 8px;border:1px solid #ef4444;color:#ef4444;background:none;border-radius:6px;cursor:pointer">✖ Huỷ</button>`:''}
         </div>
       </div>`;
     }).join('');
@@ -558,15 +560,28 @@ async function loadAppointments() {
 }
 
 async function confirmAppt(id) {
-  const doctorId = localStorage.getItem('doctor_id');
   try {
-    const res = await fetch(`${API}/api/admin/appointments/${id}`, {
+    const res = await fetch(`${API}/api/doctor/appointments/${id}`, {
       method: 'PATCH',
       headers: {...authHeaders(), 'Content-Type': 'application/json'},
-      body: JSON.stringify({status:'confirmed', doctor_id: doctorId}),
+      body: JSON.stringify({status:'confirmed'}),
     });
     if (!res.ok) throw new Error('Failed');
     notify('✅ Đã xác nhận lịch hẹn');
+    loadAppointments();
+  } catch(e) { notify('❌ Lỗi: ' + e.message); }
+}
+
+async function cancelAppt(id) {
+  if (!confirm('Huỷ lịch hẹn này?')) return;
+  try {
+    const res = await fetch(`${API}/api/doctor/appointments/${id}`, {
+      method: 'PATCH',
+      headers: {...authHeaders(), 'Content-Type': 'application/json'},
+      body: JSON.stringify({status:'cancelled'}),
+    });
+    if (!res.ok) throw new Error('Failed');
+    notify('✅ Đã huỷ lịch hẹn');
     loadAppointments();
   } catch(e) { notify('❌ Lỗi: ' + e.message); }
 }

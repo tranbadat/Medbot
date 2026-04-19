@@ -247,6 +247,47 @@ async def get_doctor_appointments(
     ]}
 
 
+class AppointmentUpdate(BaseModel):
+    status: str  # "confirmed" | "cancelled"
+
+
+@router.patch("/api/doctor/appointments/{appt_id}")
+async def update_appointment_status(
+    appt_id: str,
+    req: AppointmentUpdate,
+    doctor: dict = Depends(get_current_doctor),
+    db: AsyncSession = Depends(get_db),
+):
+    from sqlalchemy.orm import selectinload
+    result = await db.execute(
+        select(Appointment)
+        .options(selectinload(Appointment.doctor))
+        .where(
+            Appointment.id == uuid.UUID(appt_id),
+            Appointment.doctor_id == uuid.UUID(doctor["sub"]),
+        )
+    )
+    appt = result.scalar_one_or_none()
+    if not appt:
+        raise HTTPException(404, "Không tìm thấy lịch hẹn")
+    if req.status not in ("confirmed", "cancelled"):
+        raise HTTPException(400, "status phải là 'confirmed' hoặc 'cancelled'")
+
+    appt.status = AppointmentStatus(req.status)
+    await db.commit()
+
+    if req.status == "confirmed":
+        from bot.relay import send_to_appointment
+        dt_str = appt.appointment_date.strftime("%d/%m/%Y %H:%M")
+        doc_name = appt.doctor.name if appt.doctor else "bác sĩ"
+        await send_to_appointment(
+            appt,
+            f"✅ Lịch khám của bạn đã được xác nhận!\n"
+            f"📅 {dt_str}\n👨‍⚕️ {doc_name}\n\nVui lòng đến đúng giờ."
+        )
+    return {"ok": True}
+
+
 @router.get("/api/doctor/cases")
 async def get_doctor_cases(
     doctor: dict = Depends(get_current_doctor),
