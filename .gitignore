@@ -49,6 +49,9 @@ logs/
 *.tmp
 /tmp/
 
+# Local dev override (not needed on server)
+docker-compose.override.yml
+
 # Public verification files (contain domain-specific tokens)
 public/*.html
 !public/.gitkeep
