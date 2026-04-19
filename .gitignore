@@ -1,0 +1,57 @@
+# Environment & secrets
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# FastEmbed model cache
+.cache/
+fastembed_cache/
+
+# ChromaDB local data
+chroma_data/
+*.chroma
+
+# Docker volumes (if mounted locally)
+postgres_data/
+redis_data/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Temp files
+*.tmp
+/tmp/
+
+# Public verification files (contain domain-specific tokens)
+public/*.html
+!public/.gitkeep
+
+# Knowledge base index (rebuilt via embed_kb.py)
+knowledge/chroma/

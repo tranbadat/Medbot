@@ -1,0 +1,96 @@
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      chromadb:
+        condition: service_started
+    volumes:
+      - ./knowledge:/app/knowledge
+    networks:
+      - medbot
+
+  nginx:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - app
+    networks:
+      - medbot
+
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-medbot}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-medbot123}
+      POSTGRES_DB: ${POSTGRES_DB:-medbot}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-medbot}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - medbot
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --save 60 1 --loglevel warning
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - medbot
+
+  chromadb:
+    image: chromadb/chroma:0.5.23
+    restart: unless-stopped
+    volumes:
+      - chroma_data:/chroma/chroma
+    environment:
+      - IS_PERSISTENT=TRUE
+      - ANONYMIZED_TELEMETRY=FALSE
+      - CHROMA_TELEMETRY=FALSE
+    networks:
+      - medbot
+
+  # One-shot service to index the knowledge base
+  embed-kb:
+    build: .
+    command: python knowledge/embed_kb.py
+    env_file: .env
+    depends_on:
+      chromadb:
+        condition: service_started
+    restart: "no"
+    volumes:
+      - ./knowledge:/app/knowledge
+    networks:
+      - medbot
+
+volumes:
+  postgres_data:
+  redis_data:
+  chroma_data:
+
+networks:
+  medbot:
+    driver: bridge

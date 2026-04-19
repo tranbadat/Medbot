@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MedBot — Admin</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f1f5f9; color: #1e293b; min-height: 100vh; }
+
+/* Login */
+.login-wrap { display:flex; align-items:center; justify-content:center; min-height:100vh; }
+.login-card { background:#fff; border-radius:16px; padding:36px 32px; width:340px; box-shadow:0 4px 24px rgba(0,0,0,.08); }
+.login-card h2 { text-align:center; margin-bottom:24px; font-size:20px; }
+.form-group { margin-bottom:14px; }
+.form-group label { font-size:13px; font-weight:500; display:block; margin-bottom:5px; color:#475569; }
+.form-group input { width:100%; padding:9px 12px; border:1px solid #cbd5e1; border-radius:8px; font-size:14px; }
+.form-group input:focus { outline:none; border-color:#3b82f6; }
+.login-error { color:#ef4444; font-size:13px; margin-bottom:10px; display:none; }
+
+/* App layout */
+.app { display:flex; min-height:100vh; }
+.sidebar { width:220px; background:#1e293b; color:#e2e8f0; display:flex; flex-direction:column; flex-shrink:0; }
+.sidebar-logo { padding:20px 16px 12px; font-size:18px; font-weight:700; border-bottom:1px solid #334155; }
+.sidebar-logo span { color:#60a5fa; }
+.nav-item { padding:11px 16px; cursor:pointer; font-size:13px; display:flex; align-items:center; gap:8px; color:#94a3b8; border-left:3px solid transparent; }
+.nav-item:hover { background:#334155; color:#e2e8f0; }
+.nav-item.active { background:#1d4ed8; color:#fff; border-left-color:#60a5fa; }
+.sidebar-footer { margin-top:auto; padding:12px 16px; font-size:12px; color:#475569; }
+
+/* Main */
+.main { flex:1; display:flex; flex-direction:column; min-width:0; }
+.top-bar { background:#fff; border-bottom:1px solid #e2e8f0; padding:12px 24px; display:flex; align-items:center; justify-content:space-between; }
+.top-bar h2 { font-size:16px; font-weight:600; }
+.content { padding:24px; flex:1; overflow-y:auto; }
+
+/* Cards */
+.stats-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:16px; margin-bottom:24px; }
+.stat-card { background:#fff; border-radius:12px; padding:16px; box-shadow:0 1px 4px rgba(0,0,0,.06); }
+.stat-card .val { font-size:28px; font-weight:700; color:#1e40af; }
+.stat-card .lbl { font-size:12px; color:#64748b; margin-top:2px; }
+
+/* Table */
+.table-wrap { background:#fff; border-radius:12px; box-shadow:0 1px 4px rgba(0,0,0,.06); overflow:hidden; }
+.table-header { padding:14px 16px; border-bottom:1px solid #e2e8f0; display:flex; align-items:center; justify-content:space-between; }
+.table-header h3 { font-size:14px; font-weight:600; }
+table { width:100%; border-collapse:collapse; }
+th, td { padding:10px 14px; text-align:left; font-size:13px; border-bottom:1px solid #f1f5f9; }
+th { font-weight:600; color:#475569; background:#f8fafc; font-size:12px; text-transform:uppercase; }
+tr:last-child td { border-bottom:none; }
+tr:hover td { background:#f8fafc; }
+
+/* Badge */
+.badge { display:inline-block; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:500; }
+.badge-online { background:#dcfce7; color:#15803d; }
+.badge-offline { background:#f1f5f9; color:#64748b; }
+.badge-busy { background:#fef3c7; color:#92400e; }
+.badge-doctor { background:#dbeafe; color:#1d4ed8; }
+.badge-nurse { background:#f3e8ff; color:#7c3aed; }
+.badge-pending { background:#fef3c7; color:#92400e; }
+.badge-confirmed { background:#dcfce7; color:#15803d; }
+.badge-cancelled { background:#fee2e2; color:#b91c1c; }
+.badge-active { background:#dcfce7; color:#15803d; }
+.badge-closed { background:#f1f5f9; color:#64748b; }
+
+/* Buttons */
+.btn { padding:7px 14px; border-radius:8px; border:none; font-size:13px; cursor:pointer; font-weight:500; }
+.btn-primary { background:#3b82f6; color:#fff; }
+.btn-primary:hover { background:#2563eb; }
+.btn-danger { background:#fee2e2; color:#ef4444; }
+.btn-danger:hover { background:#fecaca; }
+.btn-ghost { background:#f1f5f9; color:#475569; }
+.btn-ghost:hover { background:#e2e8f0; }
+.btn-success { background:#dcfce7; color:#15803d; }
+
+/* Modal */
+.modal-bg { position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:100; display:flex; align-items:center; justify-content:center; }
+.modal { background:#fff; border-radius:16px; padding:28px; width:460px; max-width:95vw; max-height:90vh; overflow-y:auto; }
+.modal h3 { font-size:16px; font-weight:600; margin-bottom:20px; }
+.modal .form-group { margin-bottom:14px; }
+.modal .form-group label { font-size:13px; font-weight:500; color:#475569; display:block; margin-bottom:5px; }
+.modal .form-group input, .modal .form-group select { width:100%; padding:9px 12px; border:1px solid #cbd5e1; border-radius:8px; font-size:14px; }
+.modal .actions { display:flex; gap:8px; justify-content:flex-end; margin-top:20px; }
+
+/* Filter bar */
+.filter-bar { display:flex; gap:10px; margin-bottom:16px; align-items:center; flex-wrap:wrap; }
+.filter-bar input, .filter-bar select { padding:7px 12px; border:1px solid #cbd5e1; border-radius:8px; font-size:13px; }
+
+/* Shift calendar */
+.shift-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; }
+.shift-day { background:#f8fafc; border-radius:8px; padding:6px; min-height:70px; font-size:11px; }
+.shift-day .day-label { font-weight:600; color:#475569; margin-bottom:4px; }
+.shift-slot { background:#dbeafe; color:#1d4ed8; border-radius:4px; padding:2px 5px; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer; }
+.shift-slot:hover { background:#bfdbfe; }
+</style>
+</head>
+<body>
+
+<!-- Login -->
+<div id="loginView" class="login-wrap">
+  <div class="login-card">
+    <h2>🏥 MedBot Admin</h2>
+    <div class="form-group"><label>Tên đăng nhập</label><input id="adminUser" placeholder="admin" /></div>
+    <div class="form-group"><label>Mật khẩu</label><input id="adminPass" type="password" placeholder="••••••••" onkeydown="if(e.key==='Enter')doLogin()" /></div>
+    <div id="loginErr" class="login-error"></div>
+    <button class="btn btn-primary" style="width:100%" onclick="doLogin()">Đăng nhập</button>
+  </div>
+</div>
+
+<!-- App -->
+<div id="appView" class="app" style="display:none">
+  <div class="sidebar">
+    <div class="sidebar-logo">🏥 <span>MedBot</span> Admin</div>
+    <div class="nav-item active" onclick="nav('overview')" id="nav-overview">📊 Tổng quan</div>
+    <div class="nav-item" onclick="nav('staff')" id="nav-staff">👨‍⚕️ Nhân sự</div>
+    <div class="nav-item" onclick="nav('shifts')" id="nav-shifts">📆 Ca trực</div>
+    <div class="nav-item" onclick="nav('appointments')" id="nav-appointments">📅 Lịch hẹn</div>
+    <div class="nav-item" onclick="nav('sessions')" id="nav-sessions">💬 Ca tư vấn</div>
+    <div class="nav-item" onclick="nav('patients')" id="nav-patients">🧑‍🤝‍🧑 Bệnh nhân</div>
+    <div class="sidebar-footer">
+      <div id="adminName" style="color:#94a3b8;margin-bottom:6px"></div>
+      <button onclick="doLogout()" style="background:none;border:none;color:#64748b;cursor:pointer;font-size:12px;padding:0">⏻ Đăng xuất</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="top-bar">
+      <h2 id="pageTitle">Tổng quan</h2>
+      <div id="topAction"></div>
+    </div>
+    <div class="content" id="pageContent"></div>
+  </div>
+</div>
+
+<!-- Modal: Add/Edit Staff -->
+<div class="modal-bg" id="staffModal" style="display:none">
+  <div class="modal">
+    <h3 id="staffModalTitle">Thêm nhân sự</h3>
+    <div class="form-group"><label>Họ tên</label><input id="sName" placeholder="BS. Nguyễn Văn A" /></div>
+    <div class="form-group"><label>Chuyên khoa</label><input id="sSpecialty" placeholder="Nội tổng quát" /></div>
+    <div class="form-group"><label>Vai trò</label>
+      <select id="sRole"><option value="doctor">Bác sĩ</option><option value="nurse">Y tá</option></select>
+    </div>
+    <div class="form-group"><label>Giờ làm việc</label><input id="sHours" placeholder="8:00 - 17:00 (T2-T7)" /></div>
+    <div class="form-group" id="sUserGroup"><label>Username</label><input id="sUsername" placeholder="bsnguyen" /></div>
+    <div class="form-group" id="sPassGroup"><label>Mật khẩu</label><input id="sPassword" type="password" placeholder="••••••••" /></div>
+    <div class="actions">
+      <button class="btn btn-ghost" onclick="closeModal('staffModal')">Huỷ</button>
+      <button class="btn btn-primary" onclick="saveStaff()">Lưu</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Add Shift -->
+<div class="modal-bg" id="shiftModal" style="display:none">
+  <div class="modal">
+    <h3>Phân công ca trực</h3>
+    <div class="form-group"><label>Nhân sự</label>
+      <select id="shiftDoctor" style="width:100%;padding:9px 12px;border:1px solid #cbd5e1;border-radius:8px;font-size:14px"></select>
+    </div>
+    <div class="form-group"><label>Ngày</label><input id="shiftDate" type="date" /></div>
+    <div class="form-group" style="display:flex;gap:10px">
+      <div style="flex:1"><label>Giờ bắt đầu</label><input id="shiftStart" type="time" value="08:00" /></div>
+      <div style="flex:1"><label>Giờ kết thúc</label><input id="shiftEnd" type="time" value="17:00" /></div>
+    </div>
+    <div class="form-group"><label>Ghi chú</label><input id="shiftNote" placeholder="Tuỳ chọn" /></div>
+    <div class="actions">
+      <button class="btn btn-ghost" onclick="closeModal('shiftModal')">Huỷ</button>
+      <button class="btn btn-primary" onclick="saveShift()">Lưu</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = '';
+let token = localStorage.getItem('admin_token') || '';
+let _editStaffId = null;
+let _staffList = [];
+
+function authH() { return {'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json'}; }
+
+async function doLogin() {
+  const u = document.getElementById('adminUser').value.trim();
+  const p = document.getElementById('adminPass').value;
+  const err = document.getElementById('loginErr');
+  err.style.display = 'none';
+  try {
+    const res = await fetch(`${API}/api/admin/login`, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({username:u, password:p})});
+    const data = await res.json();
+    if (!res.ok) { err.textContent = data.detail || 'Lỗi đăng nhập'; err.style.display='block'; return; }
+    token = data.token;
+    localStorage.setItem('admin_token', token);
+    localStorage.setItem('admin_username', u);
+    showApp();
+  } catch(e) { err.textContent = 'Không kết nối được server'; err.style.display='block'; }
+}
+
+function showApp() {
+  document.getElementById('loginView').style.display = 'none';
+  document.getElementById('appView').style.display = 'flex';
+  document.getElementById('adminName').textContent = localStorage.getItem('admin_username') || 'admin';
+  nav('overview');
+}
+
+function doLogout() {
+  localStorage.removeItem('admin_token');
+  localStorage.removeItem('admin_username');
+  token = '';
+  document.getElementById('loginView').style.display = 'flex';
+  document.getElementById('appView').style.display = 'none';
+}
+
+function nav(page) {
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  document.getElementById(`nav-${page}`).classList.add('active');
+  const titles = {overview:'Tổng quan',staff:'Nhân sự',shifts:'Ca trực',appointments:'Lịch hẹn',sessions:'Ca tư vấn',patients:'Bệnh nhân'};
+  document.getElementById('pageTitle').textContent = titles[page] || page;
+  document.getElementById('topAction').innerHTML = '';
+  ({overview, staff, shifts, appointments, sessions, patients})[page]();
+}
+
+// ── Overview ──────────────────────────────────────────────────────────────
+async function overview() {
+  const c = document.getElementById('pageContent');
+  c.innerHTML = '<div style="color:#94a3b8">Đang tải...</div>';
+  try {
+    const res = await fetch(`${API}/api/admin/stats`, {headers: authH()});
+    const s = await res.json();
+    c.innerHTML = `
+      <div class="stats-grid">
+        <div class="stat-card"><div class="val">${s.total_doctors}</div><div class="lbl">👨‍⚕️ Bác sĩ</div></div>
+        <div class="stat-card"><div class="val">${s.total_nurses}</div><div class="lbl">🩺 Y tá</div></div>
+        <div class="stat-card"><div class="val" style="color:#22c55e">${s.online_doctors}</div><div class="lbl">🟢 Đang online</div></div>
+        <div class="stat-card"><div class="val" style="color:#3b82f6">${s.active_sessions}</div><div class="lbl">💬 Ca đang tư vấn</div></div>
+        <div class="stat-card"><div class="val" style="color:#f59e0b">${s.pending_sessions}</div><div class="lbl">⏳ Ca chờ</div></div>
+        <div class="stat-card"><div class="val">${s.today_appointments}</div><div class="lbl">📅 Lịch hẹn hôm nay</div></div>
+        <div class="stat-card"><div class="val">${s.total_patients}</div><div class="lbl">🧑‍🤝‍🧑 Bệnh nhân</div></div>
+      </div>`;
+  } catch(e) { c.innerHTML = '<div style="color:#ef4444">Lỗi tải dữ liệu</div>'; }
+}
+
+// ── Staff ─────────────────────────────────────────────────────────────────
+async function staff() {
+  const c = document.getElementById('pageContent');
+  document.getElementById('topAction').innerHTML = '<button class="btn btn-primary" onclick="openAddStaff()">+ Thêm nhân sự</button>';
+  c.innerHTML = '<div style="color:#94a3b8">Đang tải...</div>';
+  try {
+    const res = await fetch(`${API}/api/admin/staff`, {headers: authH()});
+    const data = await res.json();
+    _staffList = data.staff;
+    c.innerHTML = `<div class="table-wrap"><table>
+      <tr><th>Họ tên</th><th>Vai trò</th><th>Chuyên khoa</th><th>Giờ làm</th><th>Trạng thái</th><th></th></tr>
+      ${_staffList.map(s => `<tr>
+        <td><strong>${esc(s.name)}</strong><br><span style="font-size:11px;color:#94a3b8">${esc(s.username||'')}</span></td>
+        <td><span class="badge badge-${s.role}">${s.role==='doctor'?'Bác sĩ':'Y tá'}</span></td>
+        <td>${esc(s.specialty)}</td>
+        <td style="font-size:12px;color:#64748b">${esc(s.working_hours||'')}</td>
+        <td><span class="badge badge-${s.status}">${s.status}</span></td>
+        <td style="display:flex;gap:6px">
+          <button class="btn btn-ghost" style="padding:4px 10px;font-size:12px" onclick="openEditStaff('${s.id}')">✏️</button>
+          <button class="btn btn-danger" style="padding:4px 10px;font-size:12px" onclick="deactivateStaff('${s.id}')">🗑</button>
+        </td>
+      </tr>`).join('')}
+    </table></div>`;
+  } catch(e) { c.innerHTML = '<div style="color:#ef4444">Lỗi</div>'; }
+}
+
+function openAddStaff() {
+  _editStaffId = null;
+  document.getElementById('staffModalTitle').textContent = 'Thêm nhân sự';
+  ['sName','sSpecialty','sHours','sUsername','sPassword'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('sRole').value = 'doctor';
+  document.getElementById('sUserGroup').style.display = 'block';
+  document.getElementById('sPassGroup').style.display = 'block';
+  document.getElementById('staffModal').style.display = 'flex';
+}
+
+function openEditStaff(id) {
+  _editStaffId = id;
+  const s = _staffList.find(x => x.id === id);
+  if (!s) return;
+  document.getElementById('staffModalTitle').textContent = 'Cập nhật nhân sự';
+  document.getElementById('sName').value = s.name;
+  document.getElementById('sSpecialty').value = s.specialty;
+  document.getElementById('sRole').value = s.role;
+  document.getElementById('sHours').value = s.working_hours || '';
+  document.getElementById('sUserGroup').style.display = 'none';
+  document.getElementById('sPassGroup').style.display = 'none';
+  document.getElementById('staffModal').style.display = 'flex';
+}
+
+async function saveStaff() {
+  if (_editStaffId) {
+    const body = {name: document.getElementById('sName').value, specialty: document.getElementById('sSpecialty').value,
+      role: document.getElementById('sRole').value, working_hours: document.getElementById('sHours').value};
+    const res = await fetch(`${API}/api/admin/staff/${_editStaffId}`, {method:'PUT', headers: authH(), body: JSON.stringify(body)});
+    if (!res.ok) { alert('Lỗi cập nhật'); return; }
+  } else {
+    const body = {name: document.getElementById('sName').value, specialty: document.getElementById('sSpecialty').value,
+      role: document.getElementById('sRole').value, working_hours: document.getElementById('sHours').value,
+      username: document.getElementById('sUsername').value, password: document.getElementById('sPassword').value};
+    const res = await fetch(`${API}/api/admin/staff`, {method:'POST', headers: authH(), body: JSON.stringify(body)});
+    if (!res.ok) { const d = await res.json(); alert(d.detail || 'Lỗi'); return; }
+  }
+  closeModal('staffModal');
+  staff();
+}
+
+async function deactivateStaff(id) {
+  if (!confirm('Vô hiệu hoá nhân sự này?')) return;
+  await fetch(`${API}/api/admin/staff/${id}`, {method:'DELETE', headers: authH()});
+  staff();
+}
+
+// ── Shifts ────────────────────────────────────────────────────────────────
+async function shifts() {
+  const c = document.getElementById('pageContent');
+  document.getElementById('topAction').innerHTML = '<button class="btn btn-primary" onclick="openAddShift()">+ Phân công ca</button>';
+  c.innerHTML = '<div style="color:#94a3b8">Đang tải...</div>';
+  try {
+    const res = await fetch(`${API}/api/admin/shifts`, {headers: authH()});
+    const data = await res.json();
+    const list = data.shifts;
+    if (!list.length) { c.innerHTML = '<div style="color:#94a3b8;padding:20px">Chưa có ca trực nào</div>'; return; }
+    c.innerHTML = `<div class="table-wrap"><table>
+      <tr><th>Nhân sự</th><th>Ngày</th><th>Giờ</th><th>Ghi chú</th><th></th></tr>
+      ${list.map(s => `<tr>
+        <td>${esc(s.doctor_name)}</td>
+        <td>${s.shift_date}</td>
+        <td>${s.start_time} – ${s.end_time}</td>
+        <td style="color:#64748b;font-size:12px">${esc(s.note||'')}</td>
+        <td><button class="btn btn-danger" style="padding:4px 10px;font-size:12px" onclick="deleteShift('${s.id}')">🗑</button></td>
+      </tr>`).join('')}
+    </table></div>`;
+  } catch(e) { c.innerHTML = '<div style="color:#ef4444">Lỗi</div>'; }
+}
+
+async function openAddShift() {
+  const res = await fetch(`${API}/api/admin/staff`, {headers: authH()});
+  const data = await res.json();
+  const sel = document.getElementById('shiftDoctor');
+  sel.innerHTML = data.staff.map(s => `<option value="${s.id}">${esc(s.name)} (${s.role==='doctor'?'BS':'YT'})</option>`).join('');
+  document.getElementById('shiftDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('shiftModal').style.display = 'flex';
+}
+
+async function saveShift() {
+  const body = {doctor_id: document.getElementById('shiftDoctor').value,
+    shift_date: document.getElementById('shiftDate').value,
+    start_time: document.getElementById('shiftStart').value,
+    end_time: document.getElementById('shiftEnd').value,
+    note: document.getElementById('shiftNote').value};
+  const res = await fetch(`${API}/api/admin/shifts`, {method:'POST', headers: authH(), body: JSON.stringify(body)});
+  if (!res.ok) { alert('Lỗi lưu ca trực'); return; }
+  closeModal('shiftModal');
+  shifts();
+}
+
+async function deleteShift(id) {
+  if (!confirm('Xoá ca trực này?')) return;
+  await fetch(`${API}/api/admin/shifts/${id}`, {method:'DELETE', headers: authH()});
+  shifts();
+}
+
+// ── Appointments ──────────────────────────────────────────────────────────
+async function appointments() {
+  const c = document.getElementById('pageContent');
+  c.innerHTML = '<div style="color:#94a3b8">Đang tải...</div>';
+  try {
+    const res = await fetch(`${API}/api/admin/appointments`, {headers: authH()});
+    const data = await res.json();
+    const list = data.appointments;
+    if (!list.length) { c.innerHTML = '<div style="color:#94a3b8;padding:20px">Chưa có lịch hẹn</div>'; return; }
+    c.innerHTML = `<div class="table-wrap"><table>
+      <tr><th>Bệnh nhân</th><th>Ngày giờ</th><th>Bác sĩ</th><th>Trạng thái</th><th></th></tr>
+      ${list.map(a => {
+        const d = new Date(a.appointment_date);
+        const ds = d.toLocaleDateString('vi-VN') + ' ' + d.toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'});
+        return `<tr>
+          <td>${esc(a.patient_name)}</td>
+          <td>${ds}</td>
+          <td>${esc(a.doctor_name||'Chưa phân công')}</td>
+          <td><span class="badge badge-${a.status}">${a.status}</span></td>
+          <td style="display:flex;gap:4px">
+            ${a.status==='pending'?`<button class="btn btn-success" style="padding:4px 8px;font-size:11px" onclick="patchAppt('${a.id}','confirmed')">✅</button>`:''}
+            ${a.status!=='cancelled'?`<button class="btn btn-danger" style="padding:4px 8px;font-size:11px" onclick="patchAppt('${a.id}','cancelled')">✖</button>`:''}
+          </td>
+        </tr>`;
+      }).join('')}
+    </table></div>`;
+  } catch(e) { c.innerHTML = '<div style="color:#ef4444">Lỗi</div>'; }
+}
+
+async function patchAppt(id, status) {
+  await fetch(`${API}/api/admin/appointments/${id}`, {method:'PATCH', headers: authH(), body: JSON.stringify({status})});
+  appointments();
+}
+
+// ── Sessions ──────────────────────────────────────────────────────────────
+async function sessions() {
+  const c = document.getElementById('pageContent');
+  c.innerHTML = '<div style="color:#94a3b8">Đang tải...</div>';
+  try {
+    const res = await fetch(`${API}/api/admin/sessions`, {headers: authH()});
+    const data = await res.json();
+    const list = data.sessions;
+    c.innerHTML = `<div class="table-wrap"><table>
+      <tr><th>User</th><th>Chuyên khoa</th><th>Urgency</th><th>Bác sĩ</th><th>Trạng thái</th><th>Thời gian</th></tr>
+      ${list.map(s => `<tr>
+        <td>${esc(s.user_id)}</td>
+        <td>${esc(s.specialty||'—')}</td>
+        <td>${esc(s.urgency||'—')}</td>
+        <td>${esc(s.doctor_name||'—')}</td>
+        <td><span class="badge badge-${s.status}">${s.status}</span></td>
+        <td style="font-size:11px;color:#64748b">${s.created_at ? new Date(s.created_at).toLocaleString('vi-VN') : '—'}</td>
+      </tr>`).join('')}
+    </table></div>`;
+  } catch(e) { c.innerHTML = '<div style="color:#ef4444">Lỗi</div>'; }
+}
+
+// ── Patients ──────────────────────────────────────────────────────────────
+async function patients() {
+  const c = document.getElementById('pageContent');
+  c.innerHTML = '<div style="color:#94a3b8">Đang tải...</div>';
+  try {
+    const res = await fetch(`${API}/api/admin/patients`, {headers: authH()});
+    const data = await res.json();
+    c.innerHTML = `<div class="table-wrap"><table>
+      <tr><th>Họ tên</th><th>Username TG</th><th>Chat ID</th><th>Ca tư vấn</th><th>Lần cuối</th></tr>
+      ${data.patients.map(p => `<tr>
+        <td>${esc(p.name)}</td>
+        <td>${p.username ? '@'+esc(p.username) : '—'}</td>
+        <td style="font-size:11px;color:#64748b">${p.telegram_chat_id}</td>
+        <td style="text-align:center">${p.session_count}</td>
+        <td style="font-size:11px;color:#64748b">${p.last_seen ? new Date(p.last_seen).toLocaleString('vi-VN') : '—'}</td>
+      </tr>`).join('')}
+    </table></div>`;
+  } catch(e) { c.innerHTML = '<div style="color:#ef4444">Lỗi</div>'; }
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────
+function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// Auto-login if token saved
+window.addEventListener('load', () => {
+  if (token) showApp();
+});
+</script>
+</body>
+</html>

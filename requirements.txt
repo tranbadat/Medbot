@@ -1,0 +1,39 @@
+fastapi==0.115.5
+pydantic-settings==2.6.1
+uvicorn[standard]==0.32.1
+python-telegram-bot[webhooks]==21.6
+anthropic==0.40.0
+
+# LlamaIndex + RAG
+llama-index-core==0.12.4
+llama-index-vector-stores-chroma==0.4.1
+llama-index-embeddings-fastembed==0.3.5
+
+# Vector DB
+chromadb==0.5.23
+
+# File processing
+PyMuPDF==1.24.14
+python-docx==1.1.2
+Pillow==10.4.0
+
+# Database
+sqlalchemy[asyncio]==2.0.36
+asyncpg==0.30.0
+alembic==1.14.0
+
+# Cache
+redis[hiredis]==5.2.1
+
+# Auth & HTTP
+pyjwt==2.10.0
+python-multipart==0.0.18
+httpx==0.28.0
+python-dotenv==1.0.1
+
+# Embeddings
+fastembed==0.3.6
+
+# Auth helpers & AI
+bcrypt==4.2.1
+openai==1.57.0

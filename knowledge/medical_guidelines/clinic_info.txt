@@ -1,0 +1,55 @@
+THÔNG TIN PHÒNG KHÁM MEDBOT
+============================
+
+TÊN PHÒNG KHÁM: Phòng khám Đa khoa MedBot
+ĐỊA CHỈ: Số 1 Đường Đại Cồ Việt, Đại Học Bách Khoa Hà Nội
+ĐIỆN THOẠI: (028) 3823 xxxx
+EMAIL: contact@medbot.vn
+WEBSITE: medbot.vn
+
+GIỜ LÀM VIỆC:
+- Thứ 2 – Thứ 6: 07:30 – 20:00
+- Thứ 7: 07:30 – 17:00
+- Chủ nhật: 08:00 – 12:00
+- Cấp cứu: 24/7 (gọi 115 hoặc đến bệnh viện gần nhất)
+
+CÁC CHUYÊN KHOA:
+1. Nội tổng quát – Khám và điều trị bệnh nội khoa thông thường
+2. Nhi khoa – Chăm sóc sức khoẻ trẻ em từ sơ sinh đến 15 tuổi
+3. Da liễu – Bệnh về da, tóc, móng
+4. Tai Mũi Họng – Bệnh lý tai, mũi, họng, thanh quản
+5. Sản Phụ khoa – Chăm sóc sức khoẻ phụ nữ, thai sản
+6. Tiêu hoá – Bệnh dạ dày, đại tràng, gan mật
+7. Tim mạch – Bệnh tim, huyết áp, mạch máu
+8. Cơ Xương Khớp – Viêm khớp, thoái hoá, chấn thương
+
+DỊCH VỤ:
+- Khám bệnh trực tiếp tại phòng khám
+- Tư vấn trực tuyến qua MedBot Telegram
+- Xét nghiệm máu, nước tiểu, sinh hoá
+- Siêu âm, X-quang
+- Tiêm chủng, tiêm phòng
+- Tư vấn dinh dưỡng
+
+BẢNG GIÁ THAM KHẢO:
+- Khám tổng quát: 150.000 – 300.000 VNĐ
+- Tư vấn chuyên khoa: 200.000 – 500.000 VNĐ
+- Xét nghiệm cơ bản: 100.000 – 300.000 VNĐ
+- Siêu âm bụng: 150.000 – 250.000 VNĐ
+(Giá có thể thay đổi, vui lòng liên hệ để biết giá chính xác)
+
+CÁCH ĐẶT LỊCH HẸN:
+1. Qua Telegram: nhắn tin cho MedBot và yêu cầu đặt lịch
+2. Qua điện thoại: (028) 3823 xxxx
+3. Qua website: medbot.vn/dat-lich
+
+LƯU Ý KHI ĐẾN KHÁM:
+- Mang theo CMND/CCCD và thẻ BHYT (nếu có)
+- Đến trước giờ hẹn 15 phút để làm thủ tục
+- Nhịn ăn trước 6–8 tiếng nếu có xét nghiệm máu buổi sáng
+- Mang theo kết quả xét nghiệm, phim chụp cũ (nếu có)
+
+CHÍNH SÁCH:
+- Bảo mật thông tin bệnh nhân tuyệt đối
+- Không kê đơn thuốc qua chat — cần thăm khám trực tiếp
+- Trường hợp khẩn cấp: gọi 115 hoặc đến cấp cứu ngay

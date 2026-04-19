@@ -1,0 +1,275 @@
+import uuid
+import logging
+from datetime import datetime, timedelta
+from fastapi import APIRouter, Depends, HTTPException, Header
+from pydantic import BaseModel
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
+import jwt
+
+from db.database import get_db
+from db.models import Session as DBSession, Message, MessageRole, SessionStatus, Doctor, Appointment, AppointmentStatus
+from db.redis_client import set_doctor_status, set_doctor_meta
+from api.websocket import ws_manager
+from core.config import get_settings
+
+logger = logging.getLogger(__name__)
+router = APIRouter()
+settings = get_settings()
+
+
+# ----- Auth helpers -----
+
+def create_token(doctor_id: str, name: str, specialty: str) -> str:
+    payload = {
+        "sub": doctor_id,
+        "name": name,
+        "specialty": specialty,
+        "exp": datetime.utcnow() + timedelta(hours=settings.JWT_EXPIRE_HOURS),
+    }
+    return jwt.encode(payload, settings.JWT_SECRET, algorithm="HS256")
+
+
+def decode_token(token: str) -> dict:
+    return jwt.decode(token, settings.JWT_SECRET, algorithms=["HS256"])
+
+
+async def get_current_doctor(authorization: str = Header(None)) -> dict:
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(401, "Missing or invalid Authorization header")
+    token = authorization.split(" ", 1)[1]
+    try:
+        return decode_token(token)
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(401, "Token expired")
+    except jwt.InvalidTokenError:
+        raise HTTPException(401, "Invalid token")
+
+
+# ----- Routes -----
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+
+@router.post("/api/doctor/login")
+async def doctor_login(req: LoginRequest, db: AsyncSession = Depends(get_db)):
+    import bcrypt as _bcrypt
+    result = await db.execute(select(Doctor).where(Doctor.username == req.username))
+    doctor = result.scalar_one_or_none()
+    if not doctor or not _bcrypt.checkpw(req.password.encode(), doctor.password_hash.encode()):
+        raise HTTPException(401, "Tên đăng nhập hoặc mật khẩu không đúng")
+    token = create_token(str(doctor.id), doctor.name, doctor.specialty)
+    await set_doctor_meta(str(doctor.id), doctor.name, doctor.specialty, doctor.working_hours or "8:00 - 17:00 (T2-T7)")
+    await set_doctor_status(str(doctor.id), "online")
+    return {"token": token, "doctor_id": str(doctor.id), "name": doctor.name, "specialty": doctor.specialty}
+
+
+class StatusRequest(BaseModel):
+    status: str  # online | busy | offline
+
+
+@router.post("/api/doctor/status")
+async def set_status(
+    req: StatusRequest,
+    doctor: dict = Depends(get_current_doctor),
+):
+    if req.status not in ("online", "busy", "offline"):
+        raise HTTPException(400, "Invalid status")
+    await set_doctor_status(doctor["sub"], req.status)
+    return {"ok": True}
+
+
+class SendRequest(BaseModel):
+    case_id: str
+    content: str
+
+
+@router.post("/api/doctor/send")
+async def doctor_send(
+    req: SendRequest,
+    doctor: dict = Depends(get_current_doctor),
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(
+        select(DBSession).where(DBSession.id == uuid.UUID(req.case_id))
+    )
+    session = result.scalar_one_or_none()
+    if not session:
+        raise HTTPException(404, "Session not found")
+    if str(session.doctor_id) != doctor["sub"]:
+        raise HTTPException(403, "Not your session")
+
+    doctor_name = doctor.get("name", "Bác sĩ")
+    relay_text = f"*{doctor_name}*\n{req.content}"
+
+    from bot.relay import send_to_session
+    await send_to_session(session, relay_text)
+
+    msg = Message(session_id=session.id, role=MessageRole.doctor, content=req.content)
+    db.add(msg)
+    await db.commit()
+
+    # Broadcast back to doctor dashboard so UI is driven by server, not local push
+    from api.websocket import ws_manager
+    await ws_manager.send_to_doctor(doctor["sub"], {
+        "event": "doctor_message",
+        "case_id": req.case_id,
+        "content": req.content,
+        "doctor_name": doctor_name,
+    })
+
+    return {"ok": True}
+
+
+class AcceptRequest(BaseModel):
+    case_id: str
+
+
+@router.post("/api/doctor/accept")
+async def accept_case(
+    req: AcceptRequest,
+    doctor: dict = Depends(get_current_doctor),
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(
+        select(DBSession).where(DBSession.id == uuid.UUID(req.case_id))
+    )
+    session = result.scalar_one_or_none()
+    if not session:
+        raise HTTPException(404, "Session not found")
+
+    session.doctor_id = uuid.UUID(doctor["sub"])
+    session.status = SessionStatus.active
+    await db.commit()
+
+    from bot.relay import send_to_session
+    doctor_name = doctor.get("name", "bác sĩ")
+    prefix = "" if doctor_name.startswith("BS.") else "BS. "
+    await send_to_session(
+        session,
+        f"✅ {prefix}{doctor_name} đã nhận ca của bạn. Bạn có thể nhắn tin trực tiếp.",
+    )
+
+    return {"ok": True, "session_id": str(session.id)}
+
+
+class TransferRequest(BaseModel):
+    case_id: str
+    to_doctor_id: str
+
+
+@router.post("/api/doctor/transfer")
+async def transfer_case(
+    req: TransferRequest,
+    doctor: dict = Depends(get_current_doctor),
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(
+        select(DBSession).where(DBSession.id == uuid.UUID(req.case_id))
+    )
+    session = result.scalar_one_or_none()
+    if not session:
+        raise HTTPException(404, "Session not found")
+    if str(session.doctor_id) != doctor["sub"]:
+        raise HTTPException(403, "Not your session")
+
+    old_doctor_id = str(session.doctor_id)
+    session.doctor_id = uuid.UUID(req.to_doctor_id)
+    session.status = SessionStatus.pending
+    await db.commit()
+
+    await ws_manager.send_to_doctor(
+        req.to_doctor_id,
+        {"event": "case_transferred", "case_id": req.case_id, "from_doctor_id": old_doctor_id},
+    )
+
+    return {"ok": True}
+
+
+class CloseRequest(BaseModel):
+    case_id: str
+    close_note: str = ""
+
+
+@router.post("/api/doctor/close")
+async def close_case(
+    req: CloseRequest,
+    doctor: dict = Depends(get_current_doctor),
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(
+        select(DBSession).where(DBSession.id == uuid.UUID(req.case_id))
+    )
+    session = result.scalar_one_or_none()
+    if not session:
+        raise HTTPException(404, "Session not found")
+
+    session.status = SessionStatus.closed
+    if req.close_note:
+        session.ai_summary = (session.ai_summary or "") + f"\n[Bác sĩ ghi chú]: {req.close_note}"
+    await db.commit()
+
+    await ws_manager.broadcast_to_session(
+        req.case_id, {"event": "case_closed", "case_id": req.case_id}
+    )
+
+    from bot.relay import send_to_session
+    await send_to_session(session, "✅ Ca tư vấn đã kết thúc. Cảm ơn bạn đã sử dụng MedBot!")
+
+    return {"ok": True}
+
+
+@router.get("/api/doctor/appointments")
+async def get_doctor_appointments(
+    doctor: dict = Depends(get_current_doctor),
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(
+        select(Appointment)
+        .where(
+            Appointment.doctor_id == uuid.UUID(doctor["sub"]),
+            Appointment.status != AppointmentStatus.cancelled,
+        )
+        .order_by(Appointment.appointment_date)
+    )
+    appts = result.scalars().all()
+    return {"appointments": [
+        {
+            "id": str(a.id),
+            "patient_name": a.patient_name,
+            "appointment_date": a.appointment_date.isoformat(),
+            "status": a.status.value,
+            "created_at": a.created_at.isoformat() if a.created_at else None,
+        }
+        for a in appts
+    ]}
+
+
+@router.get("/api/doctor/cases")
+async def get_doctor_cases(
+    doctor: dict = Depends(get_current_doctor),
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(
+        select(DBSession).where(
+            DBSession.doctor_id == uuid.UUID(doctor["sub"]),
+            DBSession.status != SessionStatus.closed,
+        ).order_by(DBSession.updated_at.desc())
+    )
+    sessions = result.scalars().all()
+    return {
+        "cases": [
+            {
+                "id": str(s.id),
+                "user_id": s.user_id,
+                "status": s.status.value,
+                "specialty": s.specialty_requested,
+                "urgency": s.urgency,
+                "summary": s.ai_summary,
+                "created_at": s.created_at.isoformat() if s.created_at else None,
+            }
+            for s in sessions
+        ]
+    }
