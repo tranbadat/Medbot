@@ -18,6 +18,10 @@ def _get_chroma_collection():
 
 
 def _setup_embed_model():
+    # Suppress LlamaIndex "MockLLM" warning — we only use LlamaIndex for
+    # retrieval/embedding, LLM calls go through core/ai_client.py directly.
+    logging.getLogger("llama_index.core.llms.utils").setLevel(logging.ERROR)
+    logging.getLogger("llama_index.core.settings").setLevel(logging.ERROR)
     Settings.embed_model = FastEmbedEmbedding(model_name="intfloat/multilingual-e5-large")
     Settings.llm = None
 

@@ -307,5 +307,6 @@ def build_medicine_reminder_handler() -> ConversationHandler:
         fallbacks=[CommandHandler("cancel", cancel_command)],
         per_chat=True,
         per_user=False,
+        per_message=False,
         allow_reentry=True,
     )

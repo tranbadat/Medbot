@@ -82,15 +82,21 @@ async def lifespan(app: FastAPI):
 
     if settings.WEBHOOK_BASE_URL:
         tg_webhook = f"{settings.WEBHOOK_BASE_URL}/telegram/webhook"
-        await _telegram_app.bot.set_webhook(tg_webhook)
-        logger.info(f"Telegram webhook set: {tg_webhook}")
+        try:
+            await _telegram_app.bot.set_webhook(tg_webhook)
+            logger.info(f"Telegram webhook set: {tg_webhook}")
+        except Exception as e:
+            logger.warning(f"Telegram webhook registration failed (will retry on next request): {e}")
     else:
         logger.warning("WEBHOOK_BASE_URL not set — webhooks not registered")
 
     if settings.WEBHOOK_BASE_URL and settings.ZALO_OA_ACCESS_TOKEN:
         from core.zalo_client import register_webhook as _zalo_register
         zalo_webhook = f"{settings.WEBHOOK_BASE_URL}/zalo/webhook"
-        await _zalo_register(zalo_webhook)
+        try:
+            await _zalo_register(zalo_webhook)
+        except Exception as e:
+            logger.warning(f"Zalo webhook registration failed: {e}")
     elif settings.ZALO_OA_ACCESS_TOKEN:
         logger.warning("ZALO_OA_ACCESS_TOKEN set but WEBHOOK_BASE_URL missing — Zalo webhook not registered")
 

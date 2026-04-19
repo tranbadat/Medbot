@@ -48,6 +48,9 @@ def main():
     collection = client.get_or_create_collection("medical_kb")
 
     print("Setting up embedding model (intfloat/multilingual-e5-large)...")
+    import logging as _logging
+    _logging.getLogger("llama_index.core.llms.utils").setLevel(_logging.ERROR)
+    _logging.getLogger("llama_index.core.settings").setLevel(_logging.ERROR)
     Settings.embed_model = FastEmbedEmbedding(model_name="intfloat/multilingual-e5-large")
     Settings.llm = None
 
