@@ -1,6 +1,9 @@
 import calendar
 import logging
 from datetime import datetime, date, timedelta
+from zoneinfo import ZoneInfo
+
+VN_TZ = ZoneInfo("Asia/Ho_Chi_Minh")
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
     ContextTypes, ConversationHandler, CommandHandler,
@@ -23,8 +26,17 @@ _TIME_SLOTS = [
 
 # ── Calendar builder ───────────────────────────────────────────────────────
 
+def _has_available_slots(year: int, month: int, day: int) -> bool:
+    now = datetime.now(VN_TZ)
+    for slot in _TIME_SLOTS:
+        h, m = slot.split(":")
+        if datetime(year, month, day, int(h), int(m), tzinfo=VN_TZ) > now:
+            return True
+    return False
+
+
 def _calendar_keyboard(year: int, month: int) -> InlineKeyboardMarkup:
-    today = date.today()
+    today = datetime.now(VN_TZ).date()
     cal = calendar.monthcalendar(year, month)
     month_name = f"Tháng {month}/{year}"
 
@@ -49,7 +61,7 @@ def _calendar_keyboard(year: int, month: int) -> InlineKeyboardMarkup:
                 row.append(InlineKeyboardButton(" ", callback_data="cal:noop"))
             else:
                 d = date(year, month, day_num)
-                if d < today:
+                if d < today or (d == today and not _has_available_slots(year, month, day_num)):
                     row.append(InlineKeyboardButton("·", callback_data="cal:noop"))
                 else:
                     row.append(InlineKeyboardButton(
@@ -61,11 +73,17 @@ def _calendar_keyboard(year: int, month: int) -> InlineKeyboardMarkup:
 
 
 def _time_keyboard(year: int, month: int, day: int) -> InlineKeyboardMarkup:
+    now = datetime.now(VN_TZ)
     rows = []
     row = []
-    for i, slot in enumerate(_TIME_SLOTS):
+    for slot in _TIME_SLOTS:
         h, m = slot.split(":")
-        row.append(InlineKeyboardButton(slot, callback_data=f"ts:{year}:{month}:{day}:{h}:{m}"))
+        slot_dt = datetime(year, month, day, int(h), int(m), tzinfo=VN_TZ)
+        if slot_dt <= now:
+            btn = InlineKeyboardButton("·", callback_data="cal:noop")
+        else:
+            btn = InlineKeyboardButton(slot, callback_data=f"ts:{year}:{month}:{day}:{h}:{m}")
+        row.append(btn)
         if len(row) == 4:
             rows.append(row)
             row = []
@@ -181,8 +199,12 @@ async def handle_calendar(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
 
     if data.startswith("cal:day:"):
         _, _, year, month, day = data.split(":")
-        context.user_data["booking"]["_date"] = (int(year), int(month), int(day))
-        markup = _time_keyboard(int(year), int(month), int(day))
+        year, month, day = int(year), int(month), int(day)
+        if not _has_available_slots(year, month, day):
+            await query.answer("Không còn giờ trống cho ngày này, vui lòng chọn ngày khác.", show_alert=True)
+            return SELECT_DATE
+        context.user_data["booking"]["_date"] = (year, month, day)
+        markup = _time_keyboard(year, month, day)
         d_str = f"{day}/{month}/{year}"
         await query.edit_message_text(
             f"📅 Ngày: *{d_str}*\n\n🕐 Chọn *giờ khám*:",
@@ -199,7 +221,12 @@ async def handle_time(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
     await query.answer()
 
     _, year, month, day, hour, minute = query.data.split(":")
-    dt = datetime(int(year), int(month), int(day), int(hour), int(minute))
+    dt = datetime(int(year), int(month), int(day), int(hour), int(minute), tzinfo=VN_TZ)
+
+    if dt <= datetime.now(VN_TZ):
+        await query.answer("⚠️ Giờ này đã qua, vui lòng chọn giờ khác.", show_alert=True)
+        return SELECT_TIME
+
     context.user_data["booking"]["datetime"] = dt
     context.user_data["booking"].pop("_date", None)
 
@@ -267,7 +294,7 @@ async def confirm_booking(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
             telegram_chat_id=chat_id,
             patient_name=booking["name"],
             doctor_id=uuid.UUID(booking["doctor_id"]) if booking.get("doctor_id") else None,
-            appointment_date=booking["datetime"],
+            appointment_date=booking["datetime"].replace(tzinfo=None),
             status=AppointmentStatus.pending,
         )
         db.add(appt)
@@ -293,6 +320,92 @@ async def cancel_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     context.user_data.pop("booking", None)
     await update.message.reply_text("❌ Đã huỷ đặt lịch.")
     return ConversationHandler.END
+
+
+# ── Cancel appointment (user-side) ─────────────────────────────────────────
+
+async def show_my_appointments(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Show upcoming appointments for the user with cancel buttons."""
+    chat_id = update.effective_chat.id
+
+    from db.database import AsyncSessionLocal
+    from db.models import Appointment, AppointmentStatus
+    from sqlalchemy import select
+
+    async with AsyncSessionLocal() as db:
+        now = datetime.now(VN_TZ)
+        result = await db.execute(
+            select(Appointment)
+            .where(
+                Appointment.telegram_chat_id == chat_id,
+                Appointment.status != AppointmentStatus.cancelled,
+                Appointment.appointment_date >= now.replace(tzinfo=None),
+            )
+            .order_by(Appointment.appointment_date)
+            .limit(5)
+        )
+        appts = result.scalars().all()
+
+        if not appts:
+            msg = update.message or update.callback_query.message
+            await msg.reply_text("📋 Bạn không có lịch hẹn nào sắp tới.")
+            return
+
+        rows = []
+        lines = ["📋 *Lịch hẹn của bạn:*\n"]
+        for i, a in enumerate(appts, 1):
+            dt_str = a.appointment_date.strftime("%d/%m/%Y %H:%M")
+            status_map = {"pending": "⏳ Chờ xác nhận", "confirmed": "✅ Đã xác nhận"}
+            status = status_map.get(a.status.value, a.status.value)
+            lines.append(f"{i}. {dt_str} — {status}")
+            rows.append([InlineKeyboardButton(
+                f"❌ Huỷ lịch {dt_str}",
+                callback_data=f"cancel_appt:{str(a.id)}"
+            )])
+
+        msg = update.message or update.callback_query.message
+        await msg.reply_text(
+            "\n".join(lines),
+            parse_mode="Markdown",
+            reply_markup=InlineKeyboardMarkup(rows),
+        )
+
+
+async def handle_cancel_appt_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    query = update.callback_query
+    await query.answer()
+
+    appt_id = query.data.split(":", 1)[1]
+
+    from db.database import AsyncSessionLocal
+    from db.models import Appointment, AppointmentStatus
+    from sqlalchemy import select
+    import uuid
+
+    async with AsyncSessionLocal() as db:
+        result = await db.execute(
+            select(Appointment).where(
+                Appointment.id == uuid.UUID(appt_id),
+                Appointment.telegram_chat_id == update.effective_chat.id,
+            )
+        )
+        appt = result.scalar_one_or_none()
+        if not appt:
+            await query.edit_message_text("❌ Không tìm thấy lịch hẹn.")
+            return
+        if appt.status == AppointmentStatus.cancelled:
+            await query.edit_message_text("ℹ️ Lịch hẹn này đã được huỷ trước đó.")
+            return
+
+        dt_str = appt.appointment_date.strftime("%d/%m/%Y %H:%M")
+        appt.status = AppointmentStatus.cancelled
+        await db.commit()
+
+    await query.edit_message_text(
+        f"✅ Đã huỷ lịch hẹn ngày *{dt_str}*.\n\n"
+        "Nếu bạn muốn đặt lại, hãy nhắn *đặt lịch* bất kỳ lúc nào.",
+        parse_mode="Markdown",
+    )
 
 
 # ── Build handler ──────────────────────────────────────────────────────────

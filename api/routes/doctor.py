@@ -314,3 +314,86 @@ async def get_doctor_cases(
             for s in sessions
         ]
     }
+
+
+@router.post("/api/doctor/cases/{case_id}/delegate")
+async def delegate_to_bot(
+    case_id: str,
+    doctor: dict = Depends(get_current_doctor),
+    db: AsyncSession = Depends(get_db),
+):
+    """Doctor delegates answering to AI bot for the last user message."""
+    result = await db.execute(select(DBSession).where(DBSession.id == uuid.UUID(case_id)))
+    session = result.scalar_one_or_none()
+    if not session:
+        raise HTTPException(404, "Session not found")
+    if str(session.doctor_id) != doctor["sub"]:
+        raise HTTPException(403, "Not your session")
+
+    # Get last user message
+    last_msg_result = await db.execute(
+        select(Message)
+        .where(Message.session_id == session.id, Message.role == MessageRole.user)
+        .order_by(Message.created_at.desc())
+        .limit(1)
+    )
+    last_msg = last_msg_result.scalar_one_or_none()
+    if not last_msg:
+        raise HTTPException(400, "No user message to respond to")
+
+    # Get recent conversation history
+    history_result = await db.execute(
+        select(Message)
+        .where(Message.session_id == session.id)
+        .order_by(Message.created_at)
+        .limit(20)
+    )
+    history = [
+        {"role": "user" if m.role == MessageRole.user else "assistant", "content": m.content}
+        for m in history_result.scalars().all()
+    ]
+
+    # Get RAG context
+    from core.rag import retrieve_context
+    rag_context = await retrieve_context(last_msg.content)
+
+    # Call AI
+    from core.ai_client import chat as ai_chat
+    from core.scope_checker import parse_claude_response
+    ai_reply = await ai_chat(history, rag_context=rag_context)
+
+    # Check if AI flagged this as out-of-scope (request_doctor action)
+    parsed = parse_claude_response(ai_reply)
+    if isinstance(parsed, dict) and parsed.get("action") == "request_doctor":
+        reason = parsed.get("reason", "câu hỏi vượt phạm vi")
+        specialty = parsed.get("specialty", "")
+        notify_msg = (
+            f"⚠️ Bot không thể trả lời câu hỏi này ({reason}"
+            + (f" — chuyên khoa: {specialty}" if specialty else "")
+            + "). Vui lòng trả lời trực tiếp."
+        )
+        await ws_manager.send_to_doctor(doctor["sub"], {
+            "event": "delegate_rejected",
+            "case_id": case_id,
+            "content": notify_msg,
+        })
+        return {"ok": False, "reason": notify_msg}
+
+    # Send to patient
+    from bot.relay import send_to_session
+    await send_to_session(session, ai_reply)
+
+    # Save as bot message
+    bot_msg = Message(session_id=session.id, role=MessageRole.bot, content=ai_reply)
+    db.add(bot_msg)
+    await db.commit()
+
+    # Broadcast to doctor dashboard
+    await ws_manager.send_to_doctor(doctor["sub"], {
+        "event": "doctor_message",
+        "case_id": case_id,
+        "content": f"🤖 [MedBot AI]\n{ai_reply}",
+        "doctor_name": "MedBot AI",
+    })
+
+    return {"ok": True, "reply": ai_reply}

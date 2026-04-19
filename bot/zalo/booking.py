@@ -6,6 +6,9 @@ import json
 import logging
 import calendar
 from datetime import date, datetime, timedelta
+from zoneinfo import ZoneInfo
+
+VN_TZ = ZoneInfo("Asia/Ho_Chi_Minh")
 
 logger = logging.getLogger(__name__)
 
@@ -120,8 +123,14 @@ async def _step_select_date(user_id: str, text: str, state: dict) -> bool:
     if text.startswith("bk:date:"):
         date_str = text[8:]  # YYYY-MM-DD
         try:
-            datetime.strptime(date_str, "%Y-%m-%d")
+            chosen = datetime.strptime(date_str, "%Y-%m-%d")
         except ValueError:
+            return True
+        slots = _available_slots_for_date(date_str)
+        if not slots:
+            from core.zalo_client import send_text
+            await send_text(user_id, "⚠️ Ngày này không còn giờ trống. Vui lòng chọn ngày khác.")
+            await _send_date_picker(user_id, chosen.year, chosen.month)
             return True
         state["date"] = date_str
         state["step"] = "select_time"
@@ -133,7 +142,17 @@ async def _step_select_date(user_id: str, text: str, state: dict) -> bool:
 
 async def _step_select_time(user_id: str, text: str, state: dict) -> bool:
     if text.startswith("bk:time:"):
+        from core.zalo_client import send_text
         time_str = text[8:]
+        # Validate not in the past
+        try:
+            dt = datetime.strptime(f"{state['date']} {time_str}", "%Y-%m-%d %H:%M").replace(tzinfo=VN_TZ)
+            if dt <= datetime.now(VN_TZ):
+                await send_text(user_id, "⚠️ Giờ này đã qua, vui lòng chọn giờ khác.")
+                await _send_time_picker(user_id, state["date"])
+                return True
+        except Exception:
+            pass
         state["time"] = time_str
         state["step"] = "select_doctor"
         await _set_state(user_id, state)
@@ -183,9 +202,18 @@ async def _step_confirm(user_id: str, text: str, state: dict) -> bool:
 
 # ── UI builders ────────────────────────────────────────────────────────────
 
+def _available_slots_for_date(date_str: str) -> list[str]:
+    """Return time slots not yet past for the given date (YYYY-MM-DD)."""
+    now = datetime.now(VN_TZ)
+    return [
+        t for t in _TIME_SLOTS
+        if datetime.strptime(f"{date_str} {t}", "%Y-%m-%d %H:%M").replace(tzinfo=VN_TZ) > now
+    ]
+
+
 async def _send_date_picker(user_id: str, year: int | None = None, month: int | None = None) -> None:
     from core.zalo_client import send_text, send_buttons
-    today = date.today()
+    today = datetime.now(VN_TZ).date()
     year = year or today.year
     month = month or today.month
 
@@ -199,14 +227,14 @@ async def _send_date_picker(user_id: str, year: int | None = None, month: int | 
             if d == 0:
                 continue
             day_date = date(year, month, d)
-            if day_date >= today:
-                available_days.append(day_date)
+            if day_date < today:
+                continue
+            # Skip today if all slots are already past
+            if day_date == today and not _available_slots_for_date(day_date.isoformat()):
+                continue
+            available_days.append(day_date)
 
-    # Send in pages of 3 buttons
     await send_text(user_id, f"📅 Chọn ngày khám — Tháng {month}/{year}:")
-
-    # Navigation
-    from core.zalo_client import send_buttons
     await send_buttons(
         user_id,
         "Chuyển tháng:",
@@ -216,7 +244,10 @@ async def _send_date_picker(user_id: str, year: int | None = None, month: int | 
         ],
     )
 
-    # Days — max 3 per button message, send multiple messages
+    if not available_days:
+        await send_text(user_id, "⚠️ Không còn ngày trống trong tháng này. Vui lòng chọn tháng tiếp theo.")
+        return
+
     for i in range(0, min(len(available_days), 9), 3):
         chunk = available_days[i:i+3]
         btns = [{"title": d.strftime("%d/%m (%a)").replace("Mon","T2").replace("Tue","T3")
@@ -229,9 +260,10 @@ async def _send_date_picker(user_id: str, year: int | None = None, month: int | 
 async def _send_time_picker(user_id: str, date_str: str) -> None:
     from core.zalo_client import send_text, send_buttons
     d = datetime.strptime(date_str, "%Y-%m-%d").date()
+    slots = _available_slots_for_date(date_str)
     await send_text(user_id, f"🕐 Chọn giờ khám — {d.strftime('%d/%m/%Y')}:")
-    for i in range(0, len(_TIME_SLOTS), 3):
-        chunk = _TIME_SLOTS[i:i+3]
+    for i in range(0, len(slots), 3):
+        chunk = slots[i:i+3]
         btns = [{"title": t, "payload": f"bk:time:{t}"} for t in chunk]
         await send_buttons(user_id, " ", btns)
 

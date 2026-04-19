@@ -32,3 +32,15 @@ async def init_db():
         await conn.execute(text("ALTER TABLE appointments ALTER COLUMN telegram_chat_id DROP NOT NULL"))
         await conn.execute(text("ALTER TABLE appointments ADD COLUMN IF NOT EXISTS platform VARCHAR(20) NOT NULL DEFAULT 'telegram'"))
         await conn.execute(text("ALTER TABLE appointments ADD COLUMN IF NOT EXISTS zalo_user_id VARCHAR(100)"))
+        # Medicine reminders (create_all handles the table; extra safety no-ops)
+        await conn.execute(text(
+            "CREATE TABLE IF NOT EXISTS medicine_reminders ("
+            "id UUID PRIMARY KEY DEFAULT gen_random_uuid(), "
+            "platform VARCHAR(20) NOT NULL DEFAULT 'telegram', "
+            "telegram_chat_id BIGINT, "
+            "zalo_user_id VARCHAR(100), "
+            "medicine_name VARCHAR(200) NOT NULL, "
+            "reminder_times VARCHAR(500) NOT NULL, "
+            "is_active BOOLEAN DEFAULT TRUE, "
+            "created_at TIMESTAMP DEFAULT NOW())"
+        ))

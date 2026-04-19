@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     WEBHOOK_BASE_URL: str = ""
 
     # AI Engine: "anthropic" | "openai"
-    AI_ENGINE: str = "anthropic"
+    AI_ENGINE: str = "openai"
 
     # Anthropic / Claude
     ANTHROPIC_API_KEY: str = ""

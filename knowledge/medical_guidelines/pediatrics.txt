@@ -1,0 +1,134 @@
+HƯỚNG DẪN SỨC KHOẺ NHI KHOA
+==============================
+
+1. CÁC MỐC PHÁT TRIỂN BÌNH THƯỜNG
+
+Trẻ sơ sinh (0–1 tháng):
+- Ngủ 16–18 tiếng/ngày, bú 8–12 lần/24h
+- Giảm cân sinh lý tối đa 10% trong tuần đầu, tăng lại từ ngày 5–7
+- Vàng da sinh lý: xuất hiện ngày 2–3, hết trước 2 tuần (trẻ đủ tháng)
+
+3 tháng: cười xã hội, nhận ra khuôn mặt, giữ đầu khi nằm sấp
+6 tháng: ngồi có hỗ trợ, bập bẹ, cầm đồ vật
+9 tháng: bò, đứng vịn, nói "mama/dada" vô nghĩa
+12 tháng: đứng vững, đi với hỗ trợ, nói 1–2 từ có nghĩa
+18 tháng: đi vững, nói 10–20 từ
+24 tháng: chạy, nói câu 2 từ, >50 từ
+
+---
+
+2. SỐT Ở TRẺ EM
+
+Định nghĩa: Nhiệt độ hậu môn >38°C, nách >37.5°C
+
+Xử trí tại nhà:
+- Cho bé mặc quần áo mỏng, thoáng
+- Uống nhiều nước/bú sữa thường xuyên
+- Lau mát bằng nước ấm (37°C) ở trán, hõm nách, bẹn
+- Paracetamol: 10–15 mg/kg/lần, cách nhau 4–6 tiếng
+- Ibuprofen (từ 6 tháng tuổi): 5–10 mg/kg/lần, cách nhau 6–8 tiếng
+
+ĐẾN NGAY CƠ SỞ Y TẾ khi:
+- Trẻ < 3 tháng: sốt >38°C (bất kỳ)
+- Trẻ 3–6 tháng: sốt >39°C
+- Sốt >40°C ở mọi lứa tuổi
+- Sốt kéo dài >3 ngày
+- Sốt kèm: co giật, lơ mơ, ban xuất huyết, cứng gáy, khó thở, tím tái
+- Trẻ khóc không nín, bú kém, tiểu ít
+
+CẤP CỨU NGAY khi sốt co giật:
+- Đặt bé nằm nghiêng, không cho bất cứ gì vào miệng
+- Gọi 115 hoặc đưa đến cấp cứu ngay
+
+---
+
+3. TIÊU CHẢY Ở TRẺ
+
+Định nghĩa: đi ngoài phân lỏng >3 lần/ngày
+
+Nguyên nhân thường gặp: virus Rota (phổ biến nhất), E. coli, Salmonella
+
+Xử trí tại nhà (mất nước nhẹ):
+- Bù nước: dung dịch ORS (oresol) hoặc nước cháo muối
+- Trẻ bú mẹ: tiếp tục cho bú
+- Trẻ đã ăn dặm: ăn BRAT diet (chuối, cháo, táo, bánh mì nướng)
+- KHÔNG cho uống nước ngọt, nước trái cây nguyên chất khi tiêu chảy
+- Kẽm: 10–20 mg/ngày x 10–14 ngày giảm thời gian tiêu chảy
+
+Dấu hiệu mất nước nặng cần nhập viện:
+- Mắt trũng, môi khô, da nhăn
+- Khóc không có nước mắt
+- Tiểu ít (<1 lần/8 tiếng), nước tiểu vàng sẫm
+- Lơ mơ, li bì, tay chân lạnh
+
+---
+
+4. HÔ HẤP — VIÊM PHỔI VÀ VIÊM TIỂU PHẾ QUẢN
+
+Viêm tiểu phế quản cấp (thường gặp trẻ <2 tuổi):
+- Nguyên nhân chủ yếu: virus RSV
+- Triệu chứng: sổ mũi → ho → khó thở, thở khò khè
+- Nhẹ: điều trị tại nhà (hút mũi, nhỏ mũi muối sinh lý)
+- Nhập viện khi: SpO2 <95%, thở co lõm ngực, bú <50% bình thường
+
+Viêm phổi trẻ em — dấu hiệu cần khám ngay:
+- Thở nhanh (>60 lần/phút <2 tháng; >50 lần/phút 2–12 tháng; >40 lần/phút 1–5 tuổi)
+- Co lõm ngực dưới
+- Sốt cao không đáp ứng thuốc hạ sốt
+- Tím tái môi, đầu ngón tay
+
+---
+
+5. TIÊM CHỦNG CHO TRẺ (Lịch tiêm theo TCMR Việt Nam 2023)
+
+Sơ sinh (trong 24 giờ đầu): Viêm gan B (mũi đầu), BCG (lao)
+1 tháng: Viêm gan B (mũi 2) — nếu mẹ HBsAg dương tính
+2 tháng: Bại liệt (OPV), DTP-Hib-Hep B (Quinvaxem/Pentaxim), Rota
+3 tháng: Bại liệt (OPV), DTP-Hib-Hep B
+4 tháng: Bại liệt (OPV), DTP-Hib-Hep B, Rota
+9 tháng: Sởi (MR mũi 1)
+12 tháng: Viêm não Nhật Bản mũi 1, mũi 2 (cách nhau 1–2 tuần)
+18 tháng: DTP (nhắc), Sởi-Rubella (mũi 2), Viêm não Nhật Bản mũi 3
+24 tháng: Viêm não Nhật Bản mũi 3 (nếu chưa tiêm ở 18 tháng)
+
+Tiêm dịch vụ khuyến cáo thêm:
+- Thủy đậu: từ 12 tháng (2 mũi cách nhau 3 tháng)
+- Cúm: từ 6 tháng, tiêm nhắc hàng năm
+- Phế cầu (PCV13/PCV15): từ 6 tuần
+- Não mô cầu BC/ACYW: từ 6 tháng/9 tháng (tùy loại vaccine)
+- HPV (cho trẻ gái): từ 9–14 tuổi (2 mũi), 15+ tuổi (3 mũi)
+
+---
+
+6. DINH DƯỠNG TRẺ EM
+
+Nuôi con bằng sữa mẹ:
+- Bú hoàn toàn đến 6 tháng, tiếp tục đến 24 tháng hoặc lâu hơn
+- Bú mẹ hoàn toàn bảo vệ khỏi tiêu chảy, nhiễm trùng hô hấp
+
+Ăn dặm từ 6 tháng:
+- Bắt đầu với cháo loãng (tỉ lệ gạo:nước = 1:10)
+- Đặc dần theo từng tháng: cháo → cháo đặc → cơm nát (12–18 tháng) → cơm thường (18 tháng+)
+- Đủ 4 nhóm: tinh bột, đạm (thịt/cá/trứng/đậu), chất béo (dầu ăn thêm vào bát cháo), rau củ
+- Không thêm muối/đường cho trẻ <1 tuổi
+- Mật ong: tuyệt đối không dùng cho trẻ <1 tuổi (nguy cơ ngộ độc botulinum)
+
+Trẻ biếng ăn:
+- Không ép ăn — tạo áp lực làm tệ hơn
+- Cho ăn cùng gia đình
+- Đa dạng màu sắc, hình dạng thức ăn
+- Bổ sung kẽm, lysine nếu biếng ăn kéo dài
+
+---
+
+7. SỨC KHOẺ TÂM THẦN VÀ PHÁT TRIỂN TRẺ
+
+Dấu hiệu nghi ngờ tự kỷ (cần đánh giá chuyên sâu):
+- 12 tháng: không bi bô, không vẫy tay chào
+- 16 tháng: không nói từ đơn
+- 24 tháng: không nói câu 2 từ
+- Bất kỳ tuổi: mất kỹ năng ngôn ngữ/xã hội đã có
+
+Tăng động giảm chú ý (ADHD):
+- Khó tập trung, bốc đồng, tăng vận động quá mức
+- Chẩn đoán và điều trị cần bác sĩ nhi khoa/tâm thần trẻ em

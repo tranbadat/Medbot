@@ -1,0 +1,143 @@
+HƯỚNG DẪN CÁC THỦ THUẬT VÀ XÉT NGHIỆM THƯỜNG GẶP
+====================================================
+
+LƯU Ý: Thông tin dưới đây giúp bệnh nhân hiểu quy trình, không thay thế hướng dẫn của bác sĩ.
+
+1. XÉT NGHIỆM MÁU CƠ BẢN
+
+Công thức máu (CBC — Complete Blood Count):
+- Đo: hồng cầu (RBC), bạch cầu (WBC), tiểu cầu (Plt), hemoglobin, hematocrit
+- Chuẩn bị: không cần nhịn ăn
+- Giá trị bình thường:
+  - WBC: 4,500–11,000/µL (tăng: nhiễm trùng; giảm: suy tuỷ)
+  - RBC: nam 4.5–5.5 triệu/µL; nữ 4.0–5.0 triệu/µL
+  - Hemoglobin: nam 13.5–17.5 g/dL; nữ 12.0–15.5 g/dL (thấp: thiếu máu)
+  - Tiểu cầu: 150,000–400,000/µL
+
+Sinh hoá máu cơ bản:
+- Nhịn ăn 8–12 tiếng trước xét nghiệm đường huyết, lipid
+- Glucose lúc đói: 3.9–6.1 mmol/L
+- Creatinine: nam 62–115 µmol/L; nữ 53–97 µmol/L (đánh giá thận)
+- ALT/AST: <40 U/L (đánh giá gan)
+- Bilirubin toàn phần: <17.1 µmol/L
+
+Bảng lipid (Lipid profile):
+- Cholesterol toàn phần: <5.2 mmol/L
+- LDL-C: <2.6 mmol/L (bình thường); <1.8 mmol/L (bệnh tim mạch)
+- HDL-C: >1.0 mmol/L (nam); >1.2 mmol/L (nữ) — càng cao càng tốt
+- Triglyceride: <1.7 mmol/L
+
+---
+
+2. SIÊU ÂM
+
+Siêu âm bụng:
+- Chuẩn bị: nhịn ăn 4–6 tiếng, uống 500–1000 mL nước trước 30 phút (siêu âm tiểu khung)
+- Đánh giá: gan, mật, tụy, thận, lách, ruột thừa
+- Không đau, an toàn, không phóng xạ
+
+Siêu âm tim (Echocardiography):
+- Không cần chuẩn bị đặc biệt
+- Đánh giá: chức năng co bóp tim, van tim, dịch màng tim
+- EF (ejection fraction) bình thường: 55–70%
+
+Siêu âm mạch máu Doppler:
+- Đánh giá lưu thông máu, huyết khối tĩnh mạch sâu
+- Không cần chuẩn bị
+
+---
+
+3. X-QUANG VÀ CT SCAN
+
+X-quang ngực:
+- Đánh giá: phổi, tim, xương sườn, cột sống ngực
+- Liều phóng xạ thấp (~0.1 mSv)
+- Không cần chuẩn bị; tháo đồ kim loại
+
+CT scan (Chụp cắt lớp vi tính):
+- Ưu điểm: chi tiết hơn X-quang, nhanh
+- CT bụng: có thể cần uống thuốc cản quang, nhịn ăn 4–6 tiếng
+- CT não: không cần chuẩn bị đặc biệt (chấn thương cấp)
+- Liều phóng xạ cao hơn X-quang (~2–15 mSv tùy vùng)
+
+MRI (Cộng hưởng từ):
+- Không phóng xạ (sử dụng từ trường)
+- Chống chỉ định: máy tạo nhịp tim kim loại, mảnh kim loại trong người
+- Thời gian: 30–60 phút, cần nằm im
+- Cho hình ảnh mô mềm, não, tủy sống, khớp tốt hơn CT
+
+---
+
+4. NỘI SOI
+
+Nội soi dạ dày (Gastroscopy):
+- Chỉ định: đau thượng vị, xuất huyết tiêu hoá trên, nghi H. pylori
+- Chuẩn bị: nhịn ăn 6–8 tiếng, nhịn uống 4 tiếng
+- Có thể gây tê cổ họng hoặc gây mê nhẹ
+- Thời gian: 10–20 phút
+
+Nội soi đại tràng (Colonoscopy):
+- Chỉ định: tầm soát ung thư đại trực tràng từ 45 tuổi, xuất huyết tiêu hoá dưới, tiêu chảy mãn
+- Chuẩn bị: 1–2 ngày ăn lỏng, uống thuốc nhuận tràng làm sạch ruột tối trước
+- Thời gian: 30–60 phút, thường có gây mê nhẹ
+- Có thể cắt polyp trong lúc nội soi
+
+---
+
+5. THỦ THUẬT CAN THIỆP THƯỜNG GẶP
+
+Đặt ven/truyền dịch:
+- Kim ven đặt vào tĩnh mạch ngoại vi (thường tay)
+- Thường dùng cho: bù nước, truyền kháng sinh, dinh dưỡng tĩnh mạch
+
+Lấy máu/xét nghiệm:
+- Vị trí thường lấy: tĩnh mạch khuỷu tay
+- Uống đủ nước trước để tĩnh mạch nổi rõ
+
+Tiêm bắp (IM) và tiêm dưới da (SC):
+- IM: vaccine, kháng sinh (vùng đùi, vai)
+- SC: insulin, một số vaccine
+- Không xoa mạnh sau tiêm
+
+Khâu vết thương:
+- Chuẩn bị vết thương: làm sạch, gây tê tại chỗ
+- Theo dõi: không để vết khâu ướt, thay băng hàng ngày
+- Thời gian cắt chỉ: mặt (5–7 ngày), thân mình (7–10 ngày), tay chân (10–14 ngày)
+
+---
+
+6. TẦM SOÁT UNG THƯ (KHUYẾN NGHỊ)
+
+Ung thư đại trực tràng:
+- Colonoscopy mỗi 10 năm từ 45 tuổi (bình thường)
+- Sớm hơn nếu: tiền sử gia đình, polyp trước đó, bệnh viêm ruột mãn
+
+Ung thư cổ tử cung:
+- Pap smear mỗi 3 năm (21–65 tuổi) hoặc Pap + HPV mỗi 5 năm (30–65 tuổi)
+
+Ung thư vú:
+- Mammography hàng năm từ 40–50 tuổi (tuỳ hướng dẫn tổ chức)
+- MRI vú: nguy cơ cao (BRCA, tiền sử gia đình)
+
+Ung thư phổi:
+- LDCT (low-dose CT scan ngực) hàng năm: người 50–80 tuổi, hút thuốc ≥20 pack-year
+
+Ung thư tuyến tiền liệt:
+- PSA hàng năm + khám trực tràng: bàn bạc với bác sĩ từ 50 tuổi (45 tuổi nếu nguy cơ cao)
+
+---
+
+7. SAU PHẪU THUẬT — CHĂM SÓC TẠI NHÀ
+
+Sau phẫu thuật bụng/nội soi:
+- Ăn lỏng 1–2 ngày, tăng dần
+- Không nâng vật nặng >5 kg trong 2–4 tuần
+- Báo bác sĩ nếu: sốt >38°C, đau tăng, vết mổ đỏ/chảy dịch
+
+Huyết khối tĩnh mạch sâu (DVT) sau phẫu thuật:
+- Dấu hiệu: chân đau, sưng, ấm, đỏ → đến cơ sở y tế
+- Phòng ngừa: vận động sớm sau mổ, vớ áp lực, thuốc chống đông
+
+Theo dõi tái khám sau phẫu thuật:
+- Thường sau 1 tuần, 1 tháng, 3 tháng (tuỳ loại phẫu thuật)
+- Mang theo toa thuốc, phiếu xuất viện đến tái khám

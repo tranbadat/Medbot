@@ -57,6 +57,19 @@ async def handle_voice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     # Echo transcription so user can see what was understood
     await update.message.reply_text(f"📝 *Đã nhận:* _{text}_", parse_mode="Markdown")
 
+    # Booking intent via voice → guide with text (can't use interactive buttons)
+    import re as _re
+    if _re.search(r"(?i)đặt\s*lịch|đặt\s*hẹn|book.*appoint|đăng\s*ký\s*khám", text):
+        await update.message.reply_text(
+            "📅 *Đặt lịch khám*\n\n"
+            "Để đặt lịch, vui lòng nhắn *tin nhắn văn bản* theo một trong các cách:\n\n"
+            "1️⃣ Nhắn: *đặt lịch* — trợ lý sẽ hướng dẫn từng bước\n"
+            "2️⃣ Dùng menu: /start → chọn 📅 Lịch khám\n\n"
+            "_Lưu ý: ghi âm không hỗ trợ quy trình đặt lịch vì cần chọn ngày/giờ bằng nút bấm._",
+            parse_mode="Markdown",
+        )
+        return
+
     # Route through normal chat flow
     from api.routes.chat import chat_endpoint, ChatRequest
     from db.database import AsyncSessionLocal

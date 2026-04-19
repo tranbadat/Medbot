@@ -64,7 +64,12 @@
   .msg.doctor .msg-meta, .msg.bot .msg-meta { text-align: right; }
 
   /* Input area — flex-shrink:0 keeps it pinned at bottom */
-  .input-area { flex-shrink: 0; background: #fff; padding: 16px 24px; border-top: 1px solid #e2e8f0; }
+  .input-area { flex-shrink: 0; background: #fff; padding: 12px 24px 16px; border-top: 1px solid #e2e8f0; }
+  .quick-replies { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+  .qr-btn { padding: 5px 10px; border-radius: 16px; border: 1px solid #cbd5e1; background: #f8fafc; color: #475569; font-size: 12px; cursor: pointer; white-space: nowrap; transition: all .15s; }
+  .qr-btn:hover { background: #e0f2fe; border-color: #7dd3fc; color: #0369a1; }
+  .qr-btn.bot { border-color: #6366f1; color: #4f46e5; background: #eef2ff; }
+  .qr-btn.bot:hover { background: #c7d2fe; }
   .input-row { display: flex; gap: 10px; align-items: flex-end; }
   textarea.msg-input { flex: 1; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 10px; resize: none; font-size: 14px; font-family: inherit; max-height: 120px; min-height: 44px; }
   textarea.msg-input:focus { outline: none; border-color: #3b82f6; }
@@ -158,6 +163,14 @@
       </div>
       <div class="chat-area" id="chatArea"></div>
       <div class="input-area">
+        <div class="quick-replies" id="quickReplies">
+          <button class="qr-btn bot" onclick="delegateToBot()" title="Để AI trả lời tin nhắn cuối của bệnh nhân">🤖 Giao Bot trả lời</button>
+          <button class="qr-btn" onclick="qrFill('Giờ làm việc của phòng khám: Thứ 2–6: 07:30–20:00, Thứ 7: 07:30–17:00, CN: 08:00–12:00. Cấp cứu 24/7 gọi 115.')">🕐 Giờ làm việc</button>
+          <button class="qr-btn" onclick="qrFill('Để đặt lịch khám, bạn có thể nhắn &quot;đặt lịch&quot; để dùng trợ lý tự động, hoặc gọi (028) 3823 xxxx.')">📅 Cách đặt lịch</button>
+          <button class="qr-btn" onclick="qrFill('Phòng khám ở Số 1 Đường Đại Cồ Việt, HN. Có thể đi xe bus, taxi hoặc đặt xe công nghệ. Bãi giữ xe miễn phí cho bệnh nhân.')">📍 Địa chỉ & đường đi</button>
+          <button class="qr-btn" onclick="qrFill('Vui lòng mang theo CMND/CCCD, thẻ BHYT (nếu có) và đến trước 15 phút để làm thủ tục. Nếu có xét nghiệm máu sáng, nhịn ăn 8 tiếng trước.')">📋 Chuẩn bị trước khám</button>
+          <button class="qr-btn" onclick="qrFill('Phí khám tổng quát: 150.000–300.000 VNĐ. Khám chuyên khoa: 200.000–500.000 VNĐ. Xét nghiệm cơ bản: 100.000–300.000 VNĐ. Liên hệ để biết chính xác.')">💰 Bảng giá</button>
+        </div>
         <div class="input-row">
           <textarea class="msg-input" id="msgInput" rows="1" placeholder="Nhập tin nhắn..." onkeydown="handleKey(event)"></textarea>
           <button class="btn btn-primary" onclick="sendMessage()">Gửi</button>
@@ -303,6 +316,8 @@ function handleServerEvent(msg) {
     delete cases[msg.case_id];
     renderCaseList();
     if (activeCaseId === msg.case_id) showEmpty();
+  } else if (msg.event === 'delegate_rejected') {
+    notify('⚠️ ' + msg.content);
   }
 }
 
@@ -431,6 +446,39 @@ async function sendMessage() {
 
 function handleKey(e) {
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+
+// ---- Quick replies ----
+function qrFill(text) {
+  const input = document.getElementById('msgInput');
+  input.value = text;
+  input.focus();
+  input.setSelectionRange(text.length, text.length);
+}
+
+async function delegateToBot() {
+  if (!activeCaseId) return;
+  const btn = document.querySelector('.qr-btn.bot');
+  const orig = btn.textContent;
+  btn.textContent = '⏳ Đang xử lý...';
+  btn.disabled = true;
+  try {
+    const res = await fetch(`${API}/api/doctor/cases/${activeCaseId}/delegate`, {
+      method: 'POST',
+      headers: authHeaders(),
+    });
+    if (!res.ok) throw new Error('Failed');
+    const data = await res.json();
+    if (data.ok) {
+      notify('🤖 Bot đã trả lời bệnh nhân');
+    }
+    // delegate_rejected is handled via WebSocket event
+  } catch(e) {
+    notify('❌ Không thể giao Bot: ' + e.message);
+  } finally {
+    btn.textContent = orig;
+    btn.disabled = false;
+  }
 }
 
 // ---- Case actions ----

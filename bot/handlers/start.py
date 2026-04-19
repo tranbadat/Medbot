@@ -133,16 +133,20 @@ async def _show_appointments(query, chat_id: int) -> None:
 
     if appointments:
         lines = ["📅 *Lịch khám của bạn:*\n"]
+        rows = []
         for appt in appointments:
             date_str = appt.appointment_date.strftime("%d/%m/%Y %H:%M")
             icon = {"pending": "🕐", "confirmed": "✅", "cancelled": "❌"}.get(appt.status.value, "🕐")
             doc_name = appt.doctor.name if appt.doctor else "Chưa phân công"
             lines.append(f"{icon} {date_str} — {doc_name}")
-        markup = InlineKeyboardMarkup([
-            [InlineKeyboardButton("📅 Đặt lịch mới", callback_data="bk:start")],
-            [InlineKeyboardButton("🔙 Menu", callback_data="menu:back")],
-        ])
-        await query.message.reply_text("\n".join(lines), parse_mode="Markdown", reply_markup=markup)
+            if appt.status.value != "cancelled":
+                rows.append([InlineKeyboardButton(
+                    f"❌ Huỷ lịch {date_str}",
+                    callback_data=f"cancel_appt:{str(appt.id)}",
+                )])
+        rows.append([InlineKeyboardButton("📅 Đặt lịch mới", callback_data="bk:start")])
+        rows.append([InlineKeyboardButton("🔙 Menu", callback_data="menu:back")])
+        await query.message.reply_text("\n".join(lines), parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(rows))
     else:
         markup = InlineKeyboardMarkup([
             [InlineKeyboardButton("📅 Đặt lịch khám", callback_data="bk:start")],

@@ -45,13 +45,27 @@ async def lifespan(app: FastAPI):
     from bot.handlers.message import handle_text
     from bot.handlers.file import handle_file, handle_voice
     from bot.handlers.callback import handle_callback
-    from bot.handlers.appointment import build_appointment_handler
+    from bot.handlers.appointment import build_appointment_handler, show_my_appointments, handle_cancel_appt_callback
+    from bot.handlers.medicine_reminder import build_medicine_reminder_handler, show_reminders, handle_reminder_callback
     from bot.handlers.start import handle_start, handle_menu_callback
     from telegram.ext import CommandHandler
 
-    # ConversationHandler must be first (highest priority)
+    # ConversationHandlers must be first (highest priority)
     _telegram_app.add_handler(build_appointment_handler())
+    _telegram_app.add_handler(build_medicine_reminder_handler())
     _telegram_app.add_handler(CommandHandler("start", handle_start))
+    _telegram_app.add_handler(CommandHandler("lich", show_my_appointments))
+    _telegram_app.add_handler(CommandHandler("danhsachthuoc", show_reminders))
+    _telegram_app.add_handler(MessageHandler(
+        filters.TEXT & ~filters.COMMAND & filters.Regex(r"(?i)huỷ lịch|huy lich|xem lịch|lịch của tôi"),
+        show_my_appointments,
+    ))
+    _telegram_app.add_handler(MessageHandler(
+        filters.TEXT & ~filters.COMMAND & filters.Regex(r"(?i)danh sách thuốc|xem thuốc|nhắc thuốc của tôi"),
+        show_reminders,
+    ))
+    _telegram_app.add_handler(CallbackQueryHandler(handle_cancel_appt_callback, pattern="^cancel_appt:"))
+    _telegram_app.add_handler(CallbackQueryHandler(handle_reminder_callback, pattern="^med:"))
     _telegram_app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))
     _telegram_app.add_handler(
         MessageHandler(filters.Document.ALL | filters.PHOTO, handle_file)
@@ -90,6 +104,10 @@ async def lifespan(app: FastAPI):
     # Start appointment reminder background task
     from core.appointment_reminder import run_appointment_reminder_loop
     reminder_task = asyncio.create_task(run_appointment_reminder_loop())
+
+    # Start medicine reminder background task
+    from core.medicine_reminder_task import run_medicine_reminder_loop
+    asyncio.create_task(run_medicine_reminder_loop())
 
     yield
 

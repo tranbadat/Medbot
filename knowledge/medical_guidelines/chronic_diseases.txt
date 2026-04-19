@@ -1,0 +1,141 @@
+HƯỚNG DẪN BỆNH MÃN TÍNH
+==========================
+
+1. ĐÁI THÁO ĐƯỜNG (TIỂU ĐƯỜNG)
+
+Phân loại:
+- Típ 1: Tự miễn, tuyến tụy không sản xuất insulin. Cần tiêm insulin suốt đời.
+- Típ 2: Phổ biến nhất (90%), liên quan lối sống, kháng insulin. Điều trị bằng thuốc uống hoặc insulin.
+- Gestational (thai kỳ): xuất hiện trong thai nghén, thường tự khỏi sau sinh.
+
+Triệu chứng nhận biết:
+- Tiểu nhiều, uống nhiều nước, đói nhiều
+- Sụt cân không rõ nguyên nhân
+- Mờ mắt, chậm liền vết thương
+- Tê bì bàn tay, bàn chân
+
+Chỉ số đường huyết:
+- Bình thường lúc đói: 3.9–6.1 mmol/L (70–110 mg/dL)
+- Tiền tiểu đường: 6.1–7.0 mmol/L
+- Tiểu đường: ≥7.0 mmol/L (lúc đói) hoặc ≥11.1 mmol/L (bất kỳ)
+- HbA1c mục tiêu: <7% (người bệnh chung); <8% (cao tuổi, bệnh nặng)
+
+Chế độ ăn tiểu đường:
+- Hạn chế carbohydrate đơn giản: đường, bánh ngọt, nước ngọt
+- Ưu tiên ngũ cốc nguyên hạt, rau xanh, đậu
+- Ăn đúng giờ, không bỏ bữa
+- Kiểm soát khẩu phần — sử dụng "đĩa tiểu đường": ½ rau, ¼ đạm, ¼ tinh bột
+- Hạn chế rượu bia
+
+Biến chứng nguy hiểm cần đến cấp cứu:
+- Hạ đường huyết (<3.9 mmol/L): run, vã mồ hôi, chóng mặt, ngất
+- Tăng đường huyết cấp: khát nhiều, tiểu nhiều, hơi thở mùi táo chua (nhiễm toan ceton)
+- Biến chứng lâu dài: bệnh thận, bệnh võng mạc, thần kinh ngoại biên, tim mạch
+
+Theo dõi định kỳ:
+- Đo đường huyết tại nhà: trước và sau ăn 2 tiếng
+- Kiểm tra HbA1c mỗi 3 tháng
+- Khám mắt, thận, bàn chân hàng năm
+
+---
+
+2. TĂNG HUYẾT ÁP
+
+Phân loại (theo ACC/AHA 2017):
+- Bình thường: <120/80 mmHg
+- Tiền cao huyết áp: 120–129/80 mmHg
+- Giai đoạn 1: 130–139/80–89 mmHg
+- Giai đoạn 2: ≥140/90 mmHg
+- Cơn tăng huyết áp khẩn cấp: ≥180/120 mmHg
+
+Triệu chứng:
+- Thường không có triệu chứng (bệnh thầm lặng)
+- Khi huyết áp rất cao: đau đầu gáy, chóng mặt, ù tai, mờ mắt, chảy máu mũi
+
+Nguyên nhân thường gặp:
+- Ăn nhiều muối (>5g/ngày)
+- Thừa cân, béo phì
+- Căng thẳng tâm lý
+- Ít vận động
+- Hút thuốc, uống nhiều rượu
+
+Kiểm soát không dùng thuốc (lifestyle):
+- Giảm muối: <5g/ngày (khoảng 1 thìa cà phê)
+- Tăng kali: rau xanh, chuối, khoai tây, đậu
+- Tập thể dục 30 phút/ngày, 5 ngày/tuần
+- Giảm cân (giảm 1kg huyết áp giảm khoảng 1 mmHg)
+- Bỏ hút thuốc, hạn chế rượu bia
+- Giảm căng thẳng, ngủ đủ giấc
+
+Dấu hiệu nguy hiểm cần cấp cứu ngay:
+- Huyết áp ≥180/120 mmHg kèm đau đầu dữ dội, nhìn mờ, đau ngực, khó thở
+- Liệt nửa người, méo miệng, nói khó (đột quỵ)
+- Đau ngực lan vai/cánh tay (nhồi máu cơ tim)
+
+---
+
+3. BỆNH TIM MẠCH
+
+Bệnh động mạch vành:
+- Xơ vữa thu hẹp lòng mạch → giảm máu nuôi tim
+- Triệu chứng: đau thắt ngực (đau ngực kiểu thắt, nặng, lan lên vai trái/cánh tay/hàm)
+- Nhồi máu cơ tim: đau ngực kéo dài >20 phút, kèm vã mồ hôi, khó thở → GỌI 115 NGAY
+
+Suy tim:
+- Tim bơm không đủ máu cho cơ thể
+- Triệu chứng: khó thở khi nằm, phù chân, mệt mỏi, tim đập nhanh bất thường
+- Đột ngột khó thở nặng, phù phổi → cấp cứu ngay
+
+Rối loạn nhịp tim:
+- Nhịp nhanh: tim đập >100 lần/phút
+- Nhịp chậm: <60 lần/phút kèm chóng mặt, ngất
+- Rung nhĩ: nhịp không đều, nguy cơ đột quỵ cao
+
+Yếu tố nguy cơ tim mạch:
+- Hút thuốc lá
+- Tăng huyết áp không kiểm soát
+- Đái tháo đường
+- Cholesterol cao (LDL >3.4 mmol/L)
+- Béo phì (BMI >25)
+- Ít vận động, căng thẳng mãn tính
+- Tiền sử gia đình bệnh tim sớm (nam <55 tuổi, nữ <65 tuổi)
+
+Chỉ số cholesterol bình thường:
+- Cholesterol toàn phần: <5.2 mmol/L
+- LDL ("xấu"): <2.6 mmol/L (bệnh nhân tim mạch: <1.8 mmol/L)
+- HDL ("tốt"): >1.0 mmol/L (nam), >1.2 mmol/L (nữ)
+- Triglyceride: <1.7 mmol/L
+
+---
+
+4. BỆNH PHỔI TẮC NGHẼN MÃN TÍNH (COPD)
+
+Nguyên nhân chính: hút thuốc lá (80–90% trường hợp)
+Triệu chứng: ho mãn tính, khạc đờm, khó thở khi gắng sức
+
+Mức độ nặng (GOLD):
+- GOLD 1 (nhẹ): FEV1 ≥80%
+- GOLD 2 (trung bình): 50–79%
+- GOLD 3 (nặng): 30–49%
+- GOLD 4 (rất nặng): <30%
+
+Đợt cấp COPD cần nhập viện:
+- Khó thở tăng nặng đột ngột
+- Tím tái, SpO2 <88%
+- Không đáp ứng với thuốc giãn phế quản tại nhà
+
+---
+
+5. BỆNH GAN MÃN TÍNH VÀ XƠ GAN
+
+Nguyên nhân thường gặp: viêm gan B/C mãn tính, rượu bia, gan nhiễm mỡ
+Triệu chứng xơ gan tiến triển:
+- Vàng da, vàng mắt
+- Bụng to (báng nước)
+- Phù chân
+- Xuất huyết tiêu hoá (nôn ra máu, đi ngoài phân đen)
+
+Dấu hiệu nguy hiểm:
+- Nôn ra máu tươi: cấp cứu ngay
+- Rối loạn ý thức (bệnh não gan): cấp cứu ngay
+- Sốt cao kèm báng nước (viêm phúc mạc tự phát)

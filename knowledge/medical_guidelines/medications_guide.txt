@@ -1,0 +1,106 @@
+HƯỚNG DẪN SỬ DỤNG THUỐC AN TOÀN
+===================================
+
+LƯU Ý QUAN TRỌNG: Thông tin dưới đây chỉ mang tính giáo dục. Việc kê đơn thuốc thuộc thẩm quyền bác sĩ. Không tự ý mua và sử dụng thuốc kê đơn.
+
+1. THUỐC HẠ SỐT / GIẢM ĐAU
+
+Paracetamol (Acetaminophen / Tylenol / Efferalgan):
+- Chỉ định: sốt, đau đầu, đau nhẹ-vừa
+- Liều người lớn: 500–1000 mg/lần, tối đa 4000 mg/ngày (3000 mg nếu uống rượu thường xuyên)
+- Liều trẻ em: 10–15 mg/kg/lần, cách 4–6 tiếng
+- TUYỆT ĐỐI tránh quá liều — gây suy gan
+- Không dùng kết hợp với nhiều thuốc có chứa paracetamol
+
+Ibuprofen (NSAIDs):
+- Chỉ định: sốt, đau, viêm
+- Liều người lớn: 200–400 mg/lần, tối đa 1200 mg/ngày (không kê đơn)
+- CHỐNG CHỈ ĐỊNH: loét dạ dày đang hoạt động, suy thận, thai 3 tháng cuối, trẻ <6 tháng
+- Uống sau ăn để giảm kích ứng dạ dày
+
+Aspirin:
+- KHÔNG dùng cho trẻ <16 tuổi (nguy cơ hội chứng Reye)
+- Liều thấp (81–100 mg): phòng ngừa tim mạch — chỉ theo chỉ định bác sĩ
+
+---
+
+2. THUỐC DẠ DÀY
+
+Antacid (Maalox, Phosphalugel):
+- Trung hòa acid dạ dày tức thì
+- Uống sau ăn 1–2 giờ hoặc khi có triệu chứng
+- Không dùng >2 tuần liên tục mà không thăm khám
+
+Omeprazole / Esomeprazole (PPI):
+- Ức chế bơm proton — giảm tiết acid hiệu quả
+- Uống trước bữa ăn sáng 30 phút
+- Cần kê đơn, không tự dùng dài ngày (nguy cơ thiếu B12, canxi)
+
+Metoclopramide (Primperan):
+- Chống nôn, chống buồn nôn
+- Tác dụng phụ: buồn ngủ, rối loạn ngoại tháp (không dùng dài ngày)
+
+---
+
+3. KHÁNG SINH — NGUYÊN TẮC VÀNG
+
+⚠️ KHÁNG SINH CẦN KÊ ĐƠN BÁC SĨ ⚠️
+
+Nguyên tắc sử dụng kháng sinh:
+1. Chỉ dùng khi có bằng chứng nhiễm khuẩn (KHÔNG dùng cho nhiễm virus/cảm cúm)
+2. Uống ĐÚNG LIỀU, ĐÚNG GIỜ, ĐỦ ĐỢT (thường 5–10 ngày)
+3. KHÔNG tự ngừng sớm khi thấy đỡ — kháng thuốc sẽ xảy ra
+4. KHÔNG chia sẻ kháng sinh cho người khác
+
+Kháng sinh thường gặp:
+- Amoxicillin: nhiễm khuẩn tai, họng, viêm phổi cộng đồng (penicillin)
+- Azithromycin (Zithromax): viêm phổi không điển hình, STI (macrolide)
+- Doxycycline: mụn trứng cá, STI, lây qua tick (tetracycline)
+- Ciprofloxacin: nhiễm khuẩn đường tiết niệu, tiêu hoá (fluoroquinolone)
+- Metronidazole: nhiễm khuẩn kỵ khí, nhiễm Giardia, H. pylori
+
+Dấu hiệu dị ứng kháng sinh cần dừng ngay:
+- Phát ban, nổi mề đay
+- Phù môi, lưỡi, cổ họng (phù Quincke)
+- Khó thở, tụt huyết áp — GỌI 115 (sốc phản vệ)
+
+---
+
+4. THUỐC TIM MẠCH PHỔ BIẾN (chỉ thông tin, không tự dùng)
+
+Aspirin 81 mg: chống kết tập tiểu cầu — phòng ngừa cục máu đông
+Statin (Atorvastatin, Rosuvastatin): hạ cholesterol — uống buổi tối
+Beta-blocker (Metoprolol, Atenolol): hạ huyết áp, rối loạn nhịp — không ngừng đột ngột
+ACE inhibitor (Enalapril, Lisinopril): tăng huyết áp, suy tim — ho khan là tác dụng phụ thường gặp
+Warfarin/Xarelto: chống đông — NHIỀU TƯƠNG TÁC THUỐC, cần theo dõi INR với warfarin
+
+---
+
+5. THUỐC TIỂU ĐƯỜNG PHỔ BIẾN (chỉ thông tin)
+
+Metformin: hàng đầu ĐTĐ típ 2, uống sau ăn, tác dụng phụ: rối loạn tiêu hoá
+SGLT2 inhibitor (Empagliflozin/Dapagliflozin): bảo vệ tim, thận
+GLP-1 RA (Semaglutide): giảm đường huyết và cân nặng đáng kể
+Insulin: nhiều loại (nhanh, chậm, trung gian) — cần hướng dẫn kỹ trước sử dụng
+
+---
+
+6. BẢO QUẢN THUỐC ĐÚNG CÁCH
+
+- Nhiệt độ phòng (15–25°C), tránh ánh nắng trực tiếp
+- Insulin: bảo quản tủ lạnh (2–8°C) khi chưa mở; nhiệt độ phòng sau khi mở (28 ngày)
+- KHÔNG để thuốc trong phòng tắm (độ ẩm cao)
+- Kiểm tra hạn dùng trước khi uống
+- Thuốc hết hạn: không sử dụng, đem trả nhà thuốc để xử lý đúng cách
+
+---
+
+7. TƯƠNG TÁC THUỐC QUAN TRỌNG
+
+- Aspirin + Ibuprofen: giảm hiệu quả aspirin phòng ngừa tim mạch
+- Warfarin + NSAIDs: tăng nguy cơ chảy máu nghiêm trọng
+- Kháng sinh + thuốc tránh thai: một số kháng sinh (Rifampicin) làm giảm hiệu quả
+- Statin + Grapefruit: tăng nồng độ statin → tăng nguy cơ tiêu cơ vân
+- MAOIs + nhiều thuốc: nguy cơ cơn tăng huyết áp kịch phát, nguy hiểm tính mạng
+
+Khi được kê đơn thuốc mới, luôn thông báo cho bác sĩ tất cả thuốc đang dùng kể cả thực phẩm chức năng.

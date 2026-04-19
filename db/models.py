@@ -139,3 +139,17 @@ class Patient(Base):
     first_seen = Column(DateTime, default=datetime.utcnow)
     last_seen = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     session_count = Column(Integer, default=0)
+
+
+class MedicineReminder(Base):
+    __tablename__ = "medicine_reminders"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    platform = Column(String(20), default="telegram", nullable=False)
+    telegram_chat_id = Column(BigInteger, nullable=True, index=True)
+    zalo_user_id = Column(String(100), nullable=True, index=True)
+    medicine_name = Column(String(200), nullable=False)
+    # comma-separated "HH:MM" strings, e.g. "08:00,12:00,20:00"
+    reminder_times = Column(String(500), nullable=False)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
