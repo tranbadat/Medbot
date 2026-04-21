@@ -30,6 +30,16 @@ async def _in_active_doctor_session(chat_id: int) -> bool:
         return result.scalar_one_or_none() is not None
 
 
+async def _is_profile_complete(chat_id: int) -> bool:
+    from db.database import AsyncSessionLocal
+    from db.models import Patient
+    from sqlalchemy import select
+    async with AsyncSessionLocal() as db:
+        result = await db.execute(select(Patient.profile_complete).where(Patient.telegram_chat_id == chat_id))
+        row = result.scalar_one_or_none()
+        return bool(row)
+
+
 async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if not update.message or not update.message.text:
         return
@@ -44,6 +54,23 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     if not context.user_data.get('_welcomed'):
         context.user_data['_welcomed'] = True
         if not await _in_active_doctor_session(chat_id):
+            profile_ok = await _is_profile_complete(chat_id)
+            if not profile_ok:
+                from bot.handlers.start import _main_menu
+                from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+                tg_name = update.effective_user.first_name if update.effective_user else "bạn"
+                markup = InlineKeyboardMarkup([[
+                    InlineKeyboardButton("📋 Cập nhật hồ sơ", callback_data="profile:start"),
+                    InlineKeyboardButton("⏭ Bỏ qua", callback_data="profile:skip_all"),
+                ]])
+                await update.message.reply_text(
+                    f"👋 Xin chào *{tg_name}*! Chào mừng đến với MedBot.\n\n"
+                    "Để tư vấn chính xác hơn, hãy cho tôi biết thông tin sức khoẻ cơ bản của bạn "
+                    "(tuổi, cân nặng, chiều cao). Bạn có thể bỏ qua bất kỳ bước nào.",
+                    parse_mode="Markdown",
+                    reply_markup=markup,
+                )
+                return
             from bot.handlers.start import show_welcome
             await show_welcome(update.message.reply_text, update.effective_user)
             return
@@ -67,22 +94,8 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         await update.message.reply_text(result["content"])
 
     elif result.get("type") == "request_doctor":
-        doctors = result.get("doctors", [])
-        if doctors:
-            urgency_code = {"low": "l", "medium": "m", "high": "h"}.get(result.get("urgency", "medium"), "m")
-            from bot.handlers.callback import send_doctor_carousel
-            await send_doctor_carousel(
-                lambda text, **kw: update.message.reply_text(text, **kw),
-                doctors,
-                index=0,
-                urgency=urgency_code,
-                header=f"⚠️ {result.get('reason', 'Câu hỏi cần bác sĩ tư vấn')}\n\n",
-            )
-        else:
-            await update.message.reply_text(
-                "⚠️ Câu hỏi này cần bác sĩ tư vấn trực tiếp, nhưng hiện không có bác sĩ trực tuyến.\n"
-                "Vui lòng thử lại sau hoặc liên hệ phòng khám."
-            )
+        from bot.handlers.callback import show_out_of_scope_cta
+        await show_out_of_scope_cta(update.message.reply_text, result)
 
     elif result.get("type") == "forwarded_to_doctor":
         pass  # Already in doctor session — message forwarded, no echo needed

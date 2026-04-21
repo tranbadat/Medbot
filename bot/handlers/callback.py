@@ -7,6 +7,25 @@ logger = logging.getLogger(__name__)
 URGENCY_MAP = {"l": "low", "m": "medium", "h": "high"}
 
 
+async def show_out_of_scope_cta(reply_fn, result: dict) -> None:
+    """Show 3-CTA message when AI decides the question needs a doctor."""
+    from core.config import get_settings
+    from bot.handlers.start import _fmt_phone
+    s = get_settings()
+    phone_fmt = _fmt_phone(s.CLINIC_PHONE)
+    reason = result.get("reason", "Câu hỏi này cần bác sĩ tư vấn trực tiếp")
+    markup = InlineKeyboardMarkup([[
+        InlineKeyboardButton("📅 Đặt lịch khám", callback_data="bk:start"),
+        InlineKeyboardButton(f"📞 Gọi ngay", url=f"tel:{phone_fmt}"),
+        InlineKeyboardButton("👨‍⚕️ Gặp bác sĩ", callback_data="cta:doctor"),
+    ]])
+    await reply_fn(
+        f"⚠️ *{reason}*\n\nBạn có thể:",
+        parse_mode="Markdown",
+        reply_markup=markup,
+    )
+
+
 def _nodash_to_uuid(nodash: str) -> str:
     return f"{nodash[:8]}-{nodash[8:12]}-{nodash[12:16]}-{nodash[16:20]}-{nodash[20:]}"
 
@@ -122,3 +141,70 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
             parse_mode="Markdown",
         )
         return
+
+    # ── Out-of-scope CTA: cta:doctor ──────────────────────────────────────
+    if data.startswith("cta:"):
+        action = data[4:]
+        if action == "doctor":
+            await _handle_cta_doctor(query, update)
+        return
+
+
+async def _handle_cta_doctor(query, update: Update) -> None:
+    """Generate AI summary of conversation then show doctor carousel."""
+    chat_id = update.effective_chat.id
+
+    from db.database import AsyncSessionLocal
+    from db.models import Session as DBSession, Message, SessionStatus
+    from sqlalchemy import select
+
+    summary = "Người dùng cần tư vấn sức khoẻ"
+
+    async with AsyncSessionLocal() as db:
+        result = await db.execute(
+            select(DBSession)
+            .where(DBSession.telegram_chat_id == chat_id,
+                   DBSession.status == SessionStatus.pending)
+            .order_by(DBSession.created_at.desc())
+            .limit(1)
+        )
+        session = result.scalar_one_or_none()
+        if session:
+            msgs_result = await db.execute(
+                select(Message)
+                .where(Message.session_id == session.id)
+                .order_by(Message.created_at)
+                .limit(20)
+            )
+            messages = msgs_result.scalars().all()
+            if messages:
+                history = [{"role": m.role.value, "content": m.content} for m in messages]
+                try:
+                    from core.ai_client import chat as ai_chat
+                    history_for_summary = history + [{
+                        "role": "user",
+                        "content": "Tóm tắt vấn đề sức khoẻ của người dùng trong 2-3 câu ngắn gọn.",
+                    }]
+                    summary = await ai_chat(history_for_summary, max_tokens=150)
+                except Exception as e:
+                    logger.warning(f"AI summary failed: {e}")
+
+    from db.redis_client import get_online_doctors
+    doctors = await get_online_doctors()
+    if doctors:
+        await send_doctor_carousel(
+            query.message.reply_text,
+            doctors,
+            index=0,
+            urgency="m",
+            header=f"👨‍⚕️ *Kết nối bác sĩ*\n\n📋 _{summary}_\n\n",
+        )
+    else:
+        markup = InlineKeyboardMarkup([[
+            InlineKeyboardButton("📅 Đặt lịch khám", callback_data="bk:start"),
+        ]])
+        await query.message.reply_text(
+            "⚠️ Hiện không có bác sĩ nào trực tuyến.\n"
+            "Bạn có thể đặt lịch khám để được tư vấn.",
+            reply_markup=markup,
+        )

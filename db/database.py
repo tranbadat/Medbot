@@ -44,3 +44,11 @@ async def init_db():
             "is_active BOOLEAN DEFAULT TRUE, "
             "created_at TIMESTAMP DEFAULT NOW())"
         ))
+        # Patient health profile fields
+        await conn.execute(text("ALTER TABLE patients ADD COLUMN IF NOT EXISTS display_name VARCHAR(200)"))
+        await conn.execute(text("ALTER TABLE patients ADD COLUMN IF NOT EXISTS age INTEGER"))
+        await conn.execute(text("ALTER TABLE patients ADD COLUMN IF NOT EXISTS weight_kg INTEGER"))
+        await conn.execute(text("ALTER TABLE patients ADD COLUMN IF NOT EXISTS height_cm INTEGER"))
+        await conn.execute(text("ALTER TABLE patients ADD COLUMN IF NOT EXISTS phone VARCHAR(20)"))
+        await conn.execute(text("ALTER TABLE patients ADD COLUMN IF NOT EXISTS profile_complete BOOLEAN DEFAULT FALSE"))
+        await conn.execute(text("ALTER TABLE patients ADD COLUMN IF NOT EXISTS session_count INTEGER DEFAULT 0"))

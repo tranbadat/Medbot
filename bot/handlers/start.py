@@ -38,7 +38,30 @@ async def show_welcome(reply_fn, tg_user) -> None:
 async def handle_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await _upsert_patient(update)
     context.user_data['_welcomed'] = True
-    await show_welcome(update.message.reply_text, update.effective_user)
+
+    chat_id = update.effective_chat.id
+    from db.database import AsyncSessionLocal
+    from db.models import Patient
+    from sqlalchemy import select as _select
+    async with AsyncSessionLocal() as db:
+        row = await db.execute(_select(Patient.profile_complete).where(Patient.telegram_chat_id == chat_id))
+        profile_ok = bool(row.scalar_one_or_none())
+
+    if not profile_ok:
+        tg_name = update.effective_user.first_name if update.effective_user else "bạn"
+        markup = InlineKeyboardMarkup([[
+            InlineKeyboardButton("📋 Cập nhật hồ sơ", callback_data="profile:start"),
+            InlineKeyboardButton("⏭ Bỏ qua", callback_data="profile:skip_all"),
+        ]])
+        await update.message.reply_text(
+            f"👋 Xin chào *{tg_name}*! Chào mừng đến với *{settings.CLINIC_NAME}*.\n\n"
+            "Để tư vấn chính xác hơn, hãy cho tôi biết thông tin sức khoẻ cơ bản của bạn. "
+            "Bạn có thể bỏ qua bất kỳ bước nào.",
+            parse_mode="Markdown",
+            reply_markup=markup,
+        )
+    else:
+        await show_welcome(update.message.reply_text, update.effective_user)
 
 
 async def handle_menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -47,11 +70,8 @@ async def handle_menu_callback(update: Update, context: ContextTypes.DEFAULT_TYP
     data = query.data
 
     if data == "menu:consult":
-        await query.message.reply_text(
-            "🩺 *Tư vấn sức khoẻ*\n\nHãy mô tả triệu chứng hoặc câu hỏi sức khoẻ của bạn. "
-            "Tôi sẽ tư vấn và kết nối bác sĩ nếu cần.",
-            parse_mode="Markdown",
-        )
+        from bot.handlers.symptoms import show_symptom_picker
+        await show_symptom_picker(query.message.reply_text, context)
 
     elif data == "menu:appointment":
         await _show_appointments(query, update.effective_chat.id)
@@ -67,6 +87,20 @@ async def handle_menu_callback(update: Update, context: ContextTypes.DEFAULT_TYP
             "Chọn một tuỳ chọn:",
             reply_markup=_main_menu(),
         )
+
+    elif data == "profile:skip_all":
+        # User chose to skip profile setup — mark complete and show menu
+        chat_id = update.effective_chat.id
+        from db.database import AsyncSessionLocal
+        from db.models import Patient
+        from sqlalchemy import select
+        async with AsyncSessionLocal() as db:
+            result = await db.execute(select(Patient).where(Patient.telegram_chat_id == chat_id))
+            patient = result.scalar_one_or_none()
+            if patient:
+                patient.profile_complete = True
+                await db.commit()
+        await show_welcome(query.message.reply_text, update.effective_user)
 
 
 def _fmt_phone(phone: str) -> str:

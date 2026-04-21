@@ -136,6 +136,13 @@ class Patient(Base):
     telegram_username = Column(String(100), nullable=True)
     zalo_user_id = Column(String(100), unique=True, nullable=True, index=True)
     zalo_name = Column(String(200), nullable=True)
+    # User-provided health profile
+    display_name = Column(String(200), nullable=True)   # override for Telegram name
+    age = Column(Integer, nullable=True)
+    weight_kg = Column(Integer, nullable=True)
+    height_cm = Column(Integer, nullable=True)
+    phone = Column(String(20), nullable=True)
+    profile_complete = Column(Boolean, default=False)
     first_seen = Column(DateTime, default=datetime.utcnow)
     last_seen = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     session_count = Column(Integer, default=0)
