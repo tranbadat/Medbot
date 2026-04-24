@@ -16,11 +16,12 @@ async def show_out_of_scope_cta(reply_fn, result: dict) -> None:
     reason = result.get("reason", "Câu hỏi này cần bác sĩ tư vấn trực tiếp")
     markup = InlineKeyboardMarkup([[
         InlineKeyboardButton("📅 Đặt lịch khám", callback_data="bk:start"),
-        InlineKeyboardButton(f"📞 Gọi ngay", url=f"tel:{phone_fmt}"),
         InlineKeyboardButton("👨‍⚕️ Gặp bác sĩ", callback_data="cta:doctor"),
     ]])
     await reply_fn(
-        f"⚠️ *{reason}*\n\nBạn có thể:",
+        f"⚠️ *{reason}*\n\n"
+        f"📞 Gọi ngay: *{phone_fmt}*\n\n"
+        f"Hoặc chọn:",
         parse_mode="Markdown",
         reply_markup=markup,
     )
