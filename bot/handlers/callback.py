@@ -179,7 +179,10 @@ async def _handle_cta_doctor(query, update: Update) -> None:
             )
             messages = msgs_result.scalars().all()
             if messages:
-                history = [{"role": m.role.value, "content": m.content} for m in messages]
+                history = [
+                    {"role": "assistant" if m.role.value == "bot" else m.role.value, "content": m.content}
+                    for m in messages
+                ]
                 try:
                     from core.ai_client import chat as ai_chat
                     history_for_summary = history + [{

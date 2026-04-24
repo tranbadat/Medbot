@@ -293,6 +293,7 @@ function handleServerEvent(msg) {
   if (msg.event === 'new_case') {
     const c = msg;
     c._historyLoaded = true; // messages from server already include full history
+    if (!c.status) c.status = 'pending';
     cases[c.case_id] = c;
     renderCaseList();
     notify(`📋 Ca mới: ${c.user_id} · ${c.specialty}`);

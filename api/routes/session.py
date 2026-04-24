@@ -129,6 +129,8 @@ async def connect_session(req: ConnectRequest, db: AsyncSession = Depends(get_db
         "summary": req.summary or "Không có tóm tắt",
         "specialty": req.specialty or "Chưa xác định",
         "urgency": req.urgency,
+        "status": session.status.value,
+        "created_at": session.created_at.isoformat() if session.created_at else None,
         "messages": msg_list,
     }
 
