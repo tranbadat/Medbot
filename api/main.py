@@ -56,6 +56,7 @@ async def lifespan(app: FastAPI):
     _telegram_app.add_handler(build_medicine_reminder_handler())
     _telegram_app.add_handler(build_profile_handler())
     _telegram_app.add_handler(CommandHandler("start", handle_start))
+    _telegram_app.add_handler(CommandHandler("menu", handle_start))
     _telegram_app.add_handler(CommandHandler("lich", show_my_appointments))
     _telegram_app.add_handler(CommandHandler("danhsachthuoc", show_reminders))
     _telegram_app.add_handler(MessageHandler(

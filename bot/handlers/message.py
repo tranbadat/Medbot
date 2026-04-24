@@ -9,6 +9,22 @@ _APPOINTMENT_KEYWORDS = [
     "xem lịch", "kiểm tra lịch", "hẹn khám", "lịch tư vấn",
 ]
 
+_MENU_KEYWORDS = {
+    "menu", "/menu", "trang chủ", "trang chu", "menu chính", "menu chinh",
+    "home", "bắt đầu", "bat dau",
+}
+
+_LICH_DISAMBIG = {"lịch", "lich"}
+
+
+def _is_medicine_schedule(text_lower: str) -> bool:
+    import re
+    if re.search(r"(nhắc|nhac|uống|uong)\s*(thuốc|thuoc)", text_lower):
+        return True
+    if re.search(r"(lịch|lich)\s+(nhắc|nhac|uống|uong|thuốc|thuoc)", text_lower):
+        return True
+    return False
+
 
 async def _upsert_patient(update: Update) -> None:
     from bot.handlers.start import _upsert_patient as _up
@@ -75,10 +91,42 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
             await show_welcome(update.message.reply_text, update.effective_user)
             return
 
+    msg_lower = text.lower().strip()
+
+    # Menu keyword → show main menu
+    if msg_lower in _MENU_KEYWORDS:
+        from bot.handlers.start import show_welcome
+        await show_welcome(update.message.reply_text, update.effective_user)
+        return
+
+    # Ambiguous "lịch" alone → ask which type
+    if msg_lower in _LICH_DISAMBIG:
+        markup = InlineKeyboardMarkup([
+            [InlineKeyboardButton("📅 Lịch khám", callback_data="menu:appointment")],
+            [InlineKeyboardButton("💊 Lịch nhắc uống thuốc", callback_data="med:list")],
+            [InlineKeyboardButton("🔙 Menu", callback_data="menu:back")],
+        ])
+        await update.message.reply_text(
+            "Bạn muốn xem lịch nào?\n\n"
+            "— Lịch khám: các buổi hẹn với bác sĩ.\n"
+            "— Lịch nhắc uống thuốc: các nhắc nhở uống thuốc hằng ngày.",
+            reply_markup=markup,
+        )
+        return
+
+    # Medicine schedule phrasings that may collide with "lịch"
+    if _is_medicine_schedule(msg_lower):
+        from bot.handlers.medicine_reminder import show_reminders
+        await show_reminders(update, context)
+        return
+
     # Appointment keyword → show existing or booking button
-    msg_lower = text.lower()
     if any(kw in msg_lower for kw in _APPOINTMENT_KEYWORDS):
         await _handle_appointment_query(update, chat_id)
+        return
+
+    # LLM intent classifier fallback (covers phrasings keywords miss)
+    if await _route_by_intent(update, context, text):
         return
 
     await update.message.chat.send_action("typing")
@@ -139,3 +187,74 @@ async def _handle_appointment_query(update: Update, chat_id: int) -> None:
         ]])
 
     await update.message.reply_text(text, parse_mode="Markdown", reply_markup=markup)
+
+
+async def _route_by_intent(update: Update, context: ContextTypes.DEFAULT_TYPE, text: str) -> bool:
+    """Classify ambiguous messages via LLM and dispatch. Returns True if handled."""
+    from core.intent_classifier import classify_intent
+
+    result = await classify_intent(text)
+    if not result or result.get("confidence", 0) < 0.6:
+        return False
+
+    intent = result["intent"]
+    chat_id = update.effective_chat.id
+
+    if intent == "menu":
+        from bot.handlers.start import show_welcome
+        await show_welcome(update.message.reply_text, update.effective_user)
+        return True
+
+    if intent == "appointment_view":
+        await _handle_appointment_query(update, chat_id)
+        return True
+
+    if intent == "appointment_book":
+        markup = InlineKeyboardMarkup([[
+            InlineKeyboardButton("📅 Đặt lịch khám", callback_data="bk:start")
+        ]])
+        await update.message.reply_text("Bạn muốn đặt lịch khám? Hãy nhấn nút bên dưới.", reply_markup=markup)
+        return True
+
+    if intent == "appointment_cancel":
+        await _handle_appointment_query(update, chat_id)
+        return True
+
+    if intent == "medicine_list":
+        from bot.handlers.medicine_reminder import show_reminders
+        await show_reminders(update, context)
+        return True
+
+    if intent == "medicine_add":
+        markup = InlineKeyboardMarkup([[
+            InlineKeyboardButton("💊 Thêm nhắc uống thuốc", callback_data="med:new")
+        ]])
+        await update.message.reply_text("Bạn muốn đặt nhắc uống thuốc? Hãy nhấn nút bên dưới.", reply_markup=markup)
+        return True
+
+    if intent == "clinic_info":
+        from bot.handlers.start import _show_clinic_info
+        class _Q:
+            def __init__(self, msg): self.message = msg
+        await _show_clinic_info(_Q(update.message))
+        return True
+
+    if intent == "sos":
+        from bot.handlers.start import _show_sos
+        class _Q:
+            def __init__(self, msg): self.message = msg
+        await _show_sos(_Q(update.message))
+        return True
+
+    if intent == "call_doctor":
+        from bot.handlers.callback import show_out_of_scope_cta
+        payload = {
+            "reason": "Người dùng muốn nói chuyện trực tiếp với bác sĩ",
+            "specialty": "Nội tổng quát",
+            "urgency": "medium",
+            "doctors": [],
+        }
+        await show_out_of_scope_cta(update.message.reply_text, payload)
+        return True
+
+    return False

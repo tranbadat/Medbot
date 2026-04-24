@@ -294,7 +294,10 @@ def build_medicine_reminder_handler() -> ConversationHandler:
             CommandHandler("nhacthuoc", start_reminder),
             MessageHandler(
                 filters.TEXT & ~filters.COMMAND
-                & filters.Regex(r"(?i)nhắc\s*thuốc|nhac\s*thuoc|uống\s*thuốc|uong\s*thuoc"),
+                & filters.Regex(
+                    r"(?i)^(đặt|dat|tạo|tao|thêm|them|add|new)\s+(nhắc|nhac)\s*(thuốc|thuoc)\b"
+                    r"|^(nhắc\s*thuốc|nhac\s*thuoc|uống\s*thuốc|uong\s*thuoc)\s*$"
+                ),
                 start_reminder,
             ),
             CallbackQueryHandler(start_reminder, pattern="^med:new$"),
