@@ -17,13 +17,8 @@ _MENU_KEYWORDS = {
 _LICH_DISAMBIG = {"lịch", "lich"}
 
 
-def _is_medicine_schedule(text_lower: str) -> bool:
-    import re
-    if re.search(r"(nhắc|nhac|uống|uong)\s*(thuốc|thuoc)", text_lower):
-        return True
-    if re.search(r"(lịch|lich)\s+(nhắc|nhac|uống|uong|thuốc|thuoc)", text_lower):
-        return True
-    return False
+def _mentions_medicine(text_lower: str) -> bool:
+    return "thuốc" in text_lower or "thuoc" in text_lower or "nhắc" in text_lower or "nhac" in text_lower
 
 
 async def _upsert_patient(update: Update) -> None:
@@ -114,20 +109,20 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         )
         return
 
-    # Medicine schedule phrasings that may collide with "lịch"
-    if _is_medicine_schedule(msg_lower):
-        from bot.handlers.medicine_reminder import show_reminders
-        await show_reminders(update, context)
-        return
+    # If message mentions medicine, defer routing to the LLM classifier —
+    # keyword matching can't tell "xem nhắc thuốc" from "tôi nên uống thuốc gì".
+    if _mentions_medicine(msg_lower):
+        if await _route_by_intent(update, context, text):
+            return
+    else:
+        # Appointment keyword → show existing or booking button
+        if any(kw in msg_lower for kw in _APPOINTMENT_KEYWORDS):
+            await _handle_appointment_query(update, chat_id)
+            return
 
-    # Appointment keyword → show existing or booking button
-    if any(kw in msg_lower for kw in _APPOINTMENT_KEYWORDS):
-        await _handle_appointment_query(update, chat_id)
-        return
-
-    # LLM intent classifier fallback (covers phrasings keywords miss)
-    if await _route_by_intent(update, context, text):
-        return
+        # LLM intent classifier fallback for everything else
+        if await _route_by_intent(update, context, text):
+            return
 
     await update.message.chat.send_action("typing")
 
