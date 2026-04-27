@@ -144,7 +144,14 @@ async def _handle_out_of_scope(scope_data: dict, specialty: str | None) -> dict:
 
 @router.post("/api/chat")
 async def chat_endpoint(req: ChatRequest, db: AsyncSession = Depends(get_db)):
+    import time
+    t0 = time.perf_counter()
     session = await _get_or_create_session(db, req)
+    logger.info(
+        f"chat session={str(session.id)[:8]} platform={req.platform} "
+        f"user={req.user_id} doctor={'yes' if session.doctor_id else 'no'} "
+        f"status={session.status.value}"
+    )
 
     # Doctor is assigned → forward everything, bot must not interfere.
     if session.doctor_id and session.status != SessionStatus.closed:
@@ -154,10 +161,12 @@ async def chat_endpoint(req: ChatRequest, db: AsyncSession = Depends(get_db)):
         await ws_manager.relay_user_message(
             str(session.id), req.message, str(session.doctor_id)
         )
+        logger.info(f"chat session={str(session.id)[:8]} → forwarded_to_doctor")
         return {"type": "forwarded_to_doctor", "session_id": str(session.id)}
 
     # Regex pre-check
     if regex_check(req.message):
+        logger.info(f"chat session={str(session.id)[:8]} → out_of_scope (regex)")
         scope_data = {
             "reason": "Câu hỏi liên quan đến thuốc / chẩn đoán / thủ thuật",
             "specialty": "Nội tổng quát",
@@ -174,11 +183,22 @@ async def chat_endpoint(req: ChatRequest, db: AsyncSession = Depends(get_db)):
     extra_context = await _build_extra_context(req.message)
     if extra_context:
         rag_context = (rag_context or "") + "\n\n" + extra_context
+    logger.info(
+        f"chat session={str(session.id)[:8]} ctx rag={'yes' if rag_context else 'no'} "
+        f"history_len={len(history)}"
+    )
 
+    t_llm = time.perf_counter()
     reply_text = await ai_chat(history, rag_context=rag_context or None)
+    llm_ms = (time.perf_counter() - t_llm) * 1000
+    logger.info(f"chat session={str(session.id)[:8]} llm {llm_ms:.0f}ms len={len(reply_text)}")
 
     scope_data = parse_claude_response(reply_text)
     if scope_data:
+        logger.info(
+            f"chat session={str(session.id)[:8]} → out_of_scope (llm) "
+            f"specialty={scope_data.get('specialty')} urgency={scope_data.get('urgency')}"
+        )
         await _save_message(db, session, MessageRole.user, req.message)
         await db.commit()
         return await _handle_out_of_scope(scope_data, scope_data.get("specialty"))
@@ -186,6 +206,8 @@ async def chat_endpoint(req: ChatRequest, db: AsyncSession = Depends(get_db)):
     await _save_message(db, session, MessageRole.user, req.message)
     await _save_message(db, session, MessageRole.bot, reply_text)
     await db.commit()
+    total_ms = (time.perf_counter() - t0) * 1000
+    logger.info(f"chat session={str(session.id)[:8]} → ai_reply total {total_ms:.0f}ms")
     return {"type": "ai_reply", "content": reply_text, "session_id": str(session.id)}
 
 

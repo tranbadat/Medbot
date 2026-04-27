@@ -56,11 +56,22 @@ class ConnectionManager:
             self.disconnect_session(session_id, ws)
 
     async def notify_new_case(self, doctor_id: str, case_payload: dict) -> None:
+        import logging
+        logging.getLogger(__name__).info(
+            f"ws new_case → doctor={doctor_id[:8]} "
+            f"case={str(case_payload.get('case_id',''))[:8]} "
+            f"specialty={case_payload.get('specialty')} urgency={case_payload.get('urgency')}"
+        )
         await self.send_to_doctor(doctor_id, {"event": "new_case", **case_payload})
 
     async def relay_user_message(
         self, session_id: str, content: str, doctor_id: str | None = None
     ) -> None:
+        import logging
+        logging.getLogger(__name__).info(
+            f"ws user_msg → session={session_id[:8]} "
+            f"doctor={doctor_id[:8] if doctor_id else 'none'} len={len(content)}"
+        )
         payload = {"event": "user_message", "case_id": session_id, "content": content}
         await self.broadcast_to_session(session_id, payload)
         if doctor_id:

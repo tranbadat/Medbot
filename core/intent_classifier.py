@@ -107,6 +107,12 @@ async def classify_intent(text: str) -> dict | None:
     text = (text or "").strip()
     if not text or len(text) > 500:
         return None
+    import time
+    t0 = time.perf_counter()
     if settings.AI_ENGINE == "openai":
-        return await _classify_openai(text)
-    return await _classify_claude(text)
+        result = await _classify_openai(text)
+    else:
+        result = await _classify_claude(text)
+    dt = (time.perf_counter() - t0) * 1000
+    logger.info(f"intent_classify result={result} engine={settings.AI_ENGINE} {dt:.0f}ms")
+    return result

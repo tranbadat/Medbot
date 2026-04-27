@@ -58,6 +58,8 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     chat_id = update.effective_chat.id
     user_id = f"tg_{chat_id}"
     text = update.message.text
+    _preview = text if len(text) <= 80 else text[:77] + "..."
+    logger.info(f"[tg:{chat_id}] IN  text='{_preview}'")
 
     await _upsert_patient(update)
 
@@ -90,12 +92,14 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
 
     # Menu keyword → show main menu
     if msg_lower in _MENU_KEYWORDS:
+        logger.info(f"[tg:{chat_id}] route=menu_keyword")
         from bot.handlers.start import show_welcome
         await show_welcome(update.message.reply_text, update.effective_user)
         return
 
     # Ambiguous "lịch" alone → ask which type
     if msg_lower in _LICH_DISAMBIG:
+        logger.info(f"[tg:{chat_id}] route=lich_disambig")
         markup = InlineKeyboardMarkup([
             [InlineKeyboardButton("📅 Lịch khám", callback_data="menu:appointment")],
             [InlineKeyboardButton("💊 Lịch nhắc uống thuốc", callback_data="med:list")],
@@ -112,11 +116,13 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     # If message mentions medicine, defer routing to the LLM classifier —
     # keyword matching can't tell "xem nhắc thuốc" from "tôi nên uống thuốc gì".
     if _mentions_medicine(msg_lower):
+        logger.info(f"[tg:{chat_id}] route=medicine_mention → classifier")
         if await _route_by_intent(update, context, text):
             return
     else:
         # Appointment keyword → show existing or booking button
         if any(kw in msg_lower for kw in _APPOINTMENT_KEYWORDS):
+            logger.info(f"[tg:{chat_id}] route=appointment_keyword")
             await _handle_appointment_query(update, chat_id)
             return
 
@@ -124,6 +130,7 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         if await _route_by_intent(update, context, text):
             return
 
+    logger.info(f"[tg:{chat_id}] route=ai_chat (fallback)")
     await update.message.chat.send_action("typing")
 
     from api.routes.chat import chat_endpoint, ChatRequest
@@ -133,14 +140,17 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         req = ChatRequest(platform="telegram", telegram_chat_id=chat_id, user_id=user_id, message=text)
         result = await chat_endpoint(req, db)
 
-    if result.get("type") == "ai_reply":
+    rtype = result.get("type")
+    logger.info(f"[tg:{chat_id}] OUT type={rtype}")
+
+    if rtype == "ai_reply":
         await update.message.reply_text(result["content"])
 
-    elif result.get("type") == "request_doctor":
+    elif rtype == "request_doctor":
         from bot.handlers.callback import show_out_of_scope_cta
         await show_out_of_scope_cta(update.message.reply_text, result)
 
-    elif result.get("type") == "forwarded_to_doctor":
+    elif rtype == "forwarded_to_doctor":
         pass  # Already in doctor session — message forwarded, no echo needed
 
 

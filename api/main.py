@@ -1,7 +1,17 @@
 import asyncio
 import logging
 import json
+import warnings
 from contextlib import asynccontextmanager
+
+# Suppress PTB warning about mixed-handler ConversationHandlers — our flows
+# intentionally combine Message/Command/CallbackQuery entry points and the
+# recommended per_message=True split would require a structural rewrite.
+try:
+    from telegram.warnings import PTBUserWarning
+    warnings.filterwarnings("ignore", category=PTBUserWarning)
+except Exception:
+    warnings.filterwarnings("ignore", message=".*per_message=False.*")
 from fastapi import FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
