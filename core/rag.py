@@ -34,10 +34,12 @@ def _get_chroma_collection():
     return client, client.get_or_create_collection("medical_kb")
 
 
+# FastEmbed-supported multilingual models. Run TextEmbedding.list_supported_models()
+# to see the full catalog. e5-base/small are NOT in FastEmbed; use MiniLM for small.
 _EMBED_MODEL_ALIAS = {
-    "small": "intfloat/multilingual-e5-small",
-    "base": "intfloat/multilingual-e5-base",
-    "large": "intfloat/multilingual-e5-large",
+    "small": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",  # 384d, ~120MB
+    "base": "sentence-transformers/paraphrase-multilingual-mpnet-base-v2",   # 768d, ~420MB
+    "large": "intfloat/multilingual-e5-large",                                # 1024d, ~1GB
 }
 
 
