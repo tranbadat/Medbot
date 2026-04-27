@@ -34,8 +34,21 @@ def _get_chroma_collection():
     return client, client.get_or_create_collection("medical_kb")
 
 
+_EMBED_MODEL_ALIAS = {
+    "small": "intfloat/multilingual-e5-small",
+    "base": "intfloat/multilingual-e5-base",
+    "large": "intfloat/multilingual-e5-large",
+}
+
+
+def _resolve_embed_model_name(value: str) -> str:
+    return _EMBED_MODEL_ALIAS.get(value.lower(), value)
+
+
 def _setup_embed_model():
-    Settings.embed_model = FastEmbedEmbedding(model_name="intfloat/multilingual-e5-large")
+    model_name = _resolve_embed_model_name(config.EMBED_MODEL)
+    logger.info(f"Loading embed model: {model_name}")
+    Settings.embed_model = FastEmbedEmbedding(model_name=model_name)
     # Use an explicit MockLLM instead of None so llama_index doesn't print the
     # "LLM is explicitly disabled. Using MockLLM." notice. We only use
     # llama_index for retrieval — actual LLM calls go through core/ai_client.py.

@@ -21,6 +21,10 @@ class Settings(BaseSettings):
     REDIS_URL: str = "redis://redis:6379/0"
     CHROMA_HOST: str = "chromadb"
     CHROMA_PORT: int = 8000
+
+    # Embed model for RAG. Use "small" (~120MB) for fast startup,
+    # "large" (~1GB) for higher recall. Or pass any FastEmbed model id.
+    EMBED_MODEL: str = "small"
     JWT_SECRET: str = "change_this_secret"
     JWT_EXPIRE_HOURS: int = 24
     APP_ENV: str = "production"

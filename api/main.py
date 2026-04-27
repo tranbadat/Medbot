@@ -39,6 +39,21 @@ async def lifespan(app: FastAPI):
     await init_db()
     logger.info("Database initialized")
 
+    # Warm up RAG: download embed model + load Chroma index now so the
+    # first user request doesn't pay the cold-start cost.
+    async def _warm_rag():
+        try:
+            from core.rag import get_index
+            await get_index()
+            # Also force the embed model to materialize by encoding a dummy.
+            from llama_index.core import Settings as _LS
+            if _LS.embed_model is not None:
+                _LS.embed_model.get_text_embedding("warmup")
+            logger.info("RAG warmed up")
+        except Exception as e:
+            logger.warning(f"RAG warmup failed: {e}")
+    asyncio.create_task(_warm_rag())
+
     # Init Telegram bot
     _telegram_app = Application.builder().token(settings.TELEGRAM_TOKEN).build()
 
